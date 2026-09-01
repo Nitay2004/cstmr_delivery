@@ -1,0 +1,23 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model PickupRequest {
+  id                              String   @id @default(cuid())
+  stage                           String
+  sourcingDealNo                  String
+  pickup                          String?
+  location                        String?
+  actualPickupDate                DateTime?
+  actualDeliveredDate             DateTime?
+  createdAt                       DateTime @default(now())
+  updatedAt                       DateTime @updatedAt
+}
