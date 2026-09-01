@@ -11,13 +11,31 @@ datasource db {
 }
 
 model PickupRequest {
-  id                              String   @id @default(cuid())
+  id                              String        @id @default(cuid())
   stage                           String
   sourcingDealNo                  String
   pickup                          String?
   location                        String?
   actualPickupDate                DateTime?
   actualDeliveredDate             DateTime?
-  createdAt                       DateTime @default(now())
-  updatedAt                       DateTime @updatedAt
+  files                           PickupFile[]
+  createdAt                       DateTime      @default(now())
+  updatedAt                       DateTime      @updatedAt
+
+  @@unique([sourcingDealNo])
+  @@index([sourcingDealNo])
+  @@index([stage])
+}
+
+model PickupFile {
+  id              String         @id @default(cuid())
+  pickupRequestId String
+  pickupRequest   PickupRequest  @relation(fields: [pickupRequestId], references: [id], onDelete: Cascade)
+  fileName        String
+  fileSize        Int
+  mimeType        String
+  storagePath     String
+  createdAt       DateTime       @default(now())
+
+  @@index([pickupRequestId])
 }

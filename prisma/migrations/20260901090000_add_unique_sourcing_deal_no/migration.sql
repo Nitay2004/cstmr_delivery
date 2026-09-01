@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "PickupRequest_sourcingDealNo_key" ON "PickupRequest"("sourcingDealNo");

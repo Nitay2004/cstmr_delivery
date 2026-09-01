@@ -34,17 +34,17 @@ export function AppSidebar() {
   const pathname = usePathname()
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="border-r border-border">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/dashboard" />}>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
                 <PackageOpen className="size-4" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-semibold">Customer Portal</span>
-                <span className="text-xs opacity-70">Welcome</span>
+                <span className="font-semibold text-foreground">Customer Portal</span>
+                <span className="text-xs text-muted-foreground">Welcome</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -65,8 +65,8 @@ export function AppSidebar() {
                     tooltip={item.title}
                     render={<Link href={item.href} />}
                   >
-                    <item.icon />
-                    <span>{item.title}</span>
+                    <item.icon className="size-4" />
+                    <span className="font-medium">{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )
