@@ -1,8 +1,13 @@
+"use client";
+
 import { PickupRequestTable } from "@/components/pickup-request-table";
 import { StatCards } from "@/components/stat-cards";
 import { BulkUpload } from "@/components/bulk-upload";
+import { useUser, can } from "@/components/user-provider";
 
 export default function PickupRequestPage() {
+  const { user } = useUser();
+
   return (
     <div className="flex flex-1 flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -14,7 +19,7 @@ export default function PickupRequestPage() {
             Manage your pickup requests and monitor their status.
           </p>
         </div>
-        <BulkUpload />
+        {can(user, "importPickupRequests") && <BulkUpload />}
       </div>
 
       <StatCards />

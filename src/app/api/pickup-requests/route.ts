@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const user = await getCurrentUser(request);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user.permissions.viewPickupRequests) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
   const requests = await prisma.pickupRequest.findMany({
     orderBy: { createdAt: "desc" },
     include: { files: true },
@@ -15,6 +23,14 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const user = await getCurrentUser(request);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user.permissions.createPickupRequest) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   let body: {
     stage?: string;
     sourcingDealNo?: string;

@@ -3,12 +3,21 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
 export async function POST(request: NextRequest) {
+  const user = await getCurrentUser(request);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user.permissions.uploadFiles) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const formData = await request.formData();
   const pickupRequestId = formData.get("pickupRequestId");
   const files = formData.getAll("files");

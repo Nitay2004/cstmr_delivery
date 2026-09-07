@@ -3,7 +3,7 @@
 import * as React from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { LayoutDashboard, PackageOpen } from "lucide-react"
+import { LayoutDashboard, PackageOpen, Users } from "lucide-react"
 
 import {
   Sidebar,
@@ -16,22 +16,29 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-
-const navItems = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Pickup Request",
-    href: "/pickup-request",
-    icon: PackageOpen,
-  },
-]
+import { useUser, can } from "@/components/user-provider"
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const { user } = useUser()
+
+  const navItems = React.useMemo(() => {
+    const items: {
+      title: string;
+      href: string;
+      icon: React.ComponentType<{ className?: string }>;
+    }[] = [];
+    if (can(user, "viewDashboard")) {
+      items.push({ title: "Dashboard", href: "/dashboard", icon: LayoutDashboard });
+    }
+    if (can(user, "viewPickupRequests")) {
+      items.push({ title: "Pickup Request", href: "/pickup-request", icon: PackageOpen });
+    }
+    if (can(user, "manageUsers")) {
+      items.push({ title: "Users", href: "/users", icon: Users });
+    }
+    return items;
+  }, [user]);
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">

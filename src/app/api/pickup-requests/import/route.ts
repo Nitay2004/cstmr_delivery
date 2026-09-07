@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
 import { rowToPickupData, normalizeHeader } from "@/lib/csv";
 import { parseImportFile } from "@/lib/parse-import";
 import type { PickupRequestCreateManyInput } from "@/generated/prisma/models/PickupRequest";
@@ -12,6 +13,14 @@ type CreateData = Omit<
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
+  const user = await getCurrentUser(request);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user.permissions.importPickupRequests) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const formData = await request.formData();
   const file = formData.get("file");
 

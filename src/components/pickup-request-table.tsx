@@ -41,6 +41,7 @@ import {
   PickupRequestForm,
   type PickupRequestFormValues,
 } from "@/components/pickup-request-form";
+import { useUser, can } from "@/components/user-provider";
 
 interface PickupFile {
   id: string;
@@ -94,6 +95,11 @@ function formatDate(value: string | null) {
 }
 
 export function PickupRequestTable() {
+  const { user } = useUser();
+  const canCreate = can(user, "createPickupRequest");
+  const canEdit = can(user, "editPickupRequest");
+  const canDelete = can(user, "deletePickupRequest");
+  const colCount = 7 + (canEdit || canDelete ? 1 : 0);
   const [requests, setRequests] = useState<PickupRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -237,10 +243,12 @@ export function PickupRequestTable() {
               className={`size-4 ${loading ? "animate-spin" : ""}`}
             />
           </Button>
-          <Button size="sm" onClick={openCreate}>
-            <Plus className="size-4" />
-            New Request
-          </Button>
+{canCreate && (
+            <Button size="sm" onClick={openCreate}>
+              <Plus className="size-4" />
+              New Request
+            </Button>
+          )}
         </div>
       </CardHeader>
       
@@ -253,20 +261,22 @@ export function PickupRequestTable() {
             <TableHead>Location</TableHead>
             <TableHead>Actual Pickup Date</TableHead>
             <TableHead>Actual Delivered Date</TableHead>
-            <TableHead className="text-right">Attachments</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+<TableHead className="text-right">Attachments</TableHead>
+            {(canEdit || canDelete) && (
+              <TableHead className="text-right">Actions</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={8} className="h-40 text-center">
+              <TableCell colSpan={colCount} className="h-40 text-center">
                 <Loader2 className="mx-auto size-6 animate-spin text-muted-foreground" />
               </TableCell>
             </TableRow>
           ) : error ? (
             <TableRow>
-              <TableCell colSpan={8} className="h-40 text-center text-destructive">
+              <TableCell colSpan={colCount} className="h-40 text-center text-destructive">
                 <div className="flex flex-col items-center gap-2">
                   <AlertTriangle className="size-8 text-destructive/60" />
                   <p className="text-sm">{error}</p>
@@ -279,7 +289,7 @@ export function PickupRequestTable() {
           ) : filtered.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={8}
+                colSpan={colCount}
                 className="h-40 text-center text-muted-foreground"
               >
                 <div className="flex flex-col items-center justify-center gap-2">
@@ -316,28 +326,35 @@ export function PickupRequestTable() {
                     <span className="text-muted-foreground/50">—</span>
                   )}
                 </TableCell>
-                <TableCell className="text-right">
+<TableCell className="text-right">
                   <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => openEdit(r)}
-                      aria-label={`Edit ${r.sourcingDealNo}`}
-                    >
-                      <Pencil className="size-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => {
-                        setActionError(null);
-                        setDeleteId(r.id);
-                      }}
-                      aria-label={`Delete ${r.sourcingDealNo}`}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
+                    {canEdit && (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => openEdit(r)}
+                        aria-label={`Edit ${r.sourcingDealNo}`}
+                      >
+                        <Pencil className="size-4" />
+                      </Button>
+                    )}
+                    {canDelete && (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => {
+                          setActionError(null);
+                          setDeleteId(r.id);
+                        }}
+                        aria-label={`Delete ${r.sourcingDealNo}`}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    )}
+                    {!canEdit && !canDelete && (
+                      <span className="text-muted-foreground/50">—</span>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
