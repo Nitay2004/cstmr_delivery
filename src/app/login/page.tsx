@@ -30,7 +30,7 @@ export default function LoginPage() {
         return;
       }
 
-      window.location.href = "/dashboard";
+      window.location.href = "/pickup-request";
     } catch {
       setError("Something went wrong");
     } finally {

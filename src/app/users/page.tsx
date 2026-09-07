@@ -67,7 +67,6 @@ const emptyForm = {
 function permissionSummary(p: Permissions) {
   const labels: string[] = [];
   if (p.manageUsers) labels.push("Users");
-  if (p.viewDashboard) labels.push("Dashboard");
   if (p.viewPickupRequests) labels.push("Pickup");
   return labels.length > 0 ? labels.join(" • ") : "No access";
 }

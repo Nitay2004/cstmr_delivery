@@ -3,7 +3,7 @@
 import * as React from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { LayoutDashboard, PackageOpen, Users } from "lucide-react"
+import { PackageOpen, Users } from "lucide-react"
 
 import {
   Sidebar,
@@ -28,9 +28,6 @@ export function AppSidebar() {
       href: string;
       icon: React.ComponentType<{ className?: string }>;
     }[] = [];
-    if (can(user, "viewDashboard")) {
-      items.push({ title: "Dashboard", href: "/dashboard", icon: LayoutDashboard });
-    }
     if (can(user, "viewPickupRequests")) {
       items.push({ title: "Pickup Request", href: "/pickup-request", icon: PackageOpen });
     }
@@ -45,7 +42,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href="/dashboard" />}>
+            <SidebarMenuButton size="lg" render={<Link href="/pickup-request" />}>
               <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
                 <PackageOpen className="size-4" />
               </div>

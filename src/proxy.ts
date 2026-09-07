@@ -17,7 +17,7 @@ export async function proxy(request: NextRequest) {
 
   if (isPublicPage) {
     if (user) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL("/pickup-request", request.url));
     }
     return NextResponse.next();
   }
@@ -29,7 +29,7 @@ export async function proxy(request: NextRequest) {
 
   if (pathname.startsWith("/users")) {
     if (!user.permissions.manageUsers) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL("/pickup-request", request.url));
     }
   }
 

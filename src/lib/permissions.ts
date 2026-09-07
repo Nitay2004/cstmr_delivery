@@ -1,7 +1,6 @@
 export type Role = "ADMIN" | "EDITOR" | "VIEWER";
 
 export interface Permissions {
-  viewDashboard: boolean;
   viewPickupRequests: boolean;
   createPickupRequest: boolean;
   editPickupRequest: boolean;
@@ -15,7 +14,6 @@ export type PermissionKey = keyof Permissions;
 
 export function emptyPermissions(): Permissions {
   return {
-    viewDashboard: false,
     viewPickupRequests: false,
     createPickupRequest: false,
     editPickupRequest: false,
@@ -28,7 +26,6 @@ export function emptyPermissions(): Permissions {
 
 export const ROLE_PRESETS: Record<Role, Permissions> = {
   ADMIN: {
-    viewDashboard: true,
     viewPickupRequests: true,
     createPickupRequest: true,
     editPickupRequest: true,
@@ -38,7 +35,6 @@ export const ROLE_PRESETS: Record<Role, Permissions> = {
     manageUsers: true,
   },
   EDITOR: {
-    viewDashboard: true,
     viewPickupRequests: true,
     createPickupRequest: true,
     editPickupRequest: true,
@@ -48,7 +44,6 @@ export const ROLE_PRESETS: Record<Role, Permissions> = {
     manageUsers: false,
   },
   VIEWER: {
-    viewDashboard: true,
     viewPickupRequests: true,
     createPickupRequest: false,
     editPickupRequest: false,
@@ -66,11 +61,6 @@ export const PERMISSION_DEFS: {
   label: string;
   description: string;
 }[] = [
-  {
-    key: "viewDashboard",
-    label: "View Dashboard",
-    description: "See the dashboard page.",
-  },
   {
     key: "viewPickupRequests",
     label: "View Pickup Requests",
