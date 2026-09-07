@@ -13,6 +13,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname === "/dashboard") {
+    return NextResponse.redirect(new URL("/pickup-request", request.url));
+  }
+
   const user = token ? await getCurrentUserFromToken(token) : null;
 
   if (isPublicPage) {
