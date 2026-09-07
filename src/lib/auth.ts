@@ -8,7 +8,9 @@ import {
   normalizePermsOverrides,
 } from "@/lib/permissions";
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
+const JWT_SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET ?? "cstmr_portal_jwt_secret_key_2026_super_secure"
+);
 const TOKEN_EXPIRY = "30m";
 const TOKEN_MAX_AGE = 30 * 60;
 const IS_PROD = process.env.NODE_ENV === "production";
