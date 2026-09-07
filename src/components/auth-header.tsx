@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import {
   Avatar,
   AvatarFallback,
@@ -18,13 +17,11 @@ import { LogIn, LogOut, User } from "lucide-react";
 import { useUser } from "@/components/user-provider";
 
 export function AuthHeader() {
-  const router = useRouter();
   const { user, loading } = useUser();
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
-    router.refresh();
+    window.location.href = "/login";
   }
 
   if (loading) {
@@ -40,7 +37,9 @@ export function AuthHeader() {
   if (!user) {
     return (
       <button
-        onClick={() => router.push("/login")}
+        onClick={() => {
+          window.location.href = "/login";
+        }}
         className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
       >
         <LogIn className="size-4" />
