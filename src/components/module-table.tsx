@@ -40,9 +40,7 @@ import {
 import { ModuleForm } from "@/components/module-form";
 import type { AttachmentModule } from "@/components/attachment-section";
 import { useUser, can } from "@/components/user-provider";
-import type { TableColumn, FormField } from "@/lib/module-config";
-
-type ModuleRow = { id: string } & Record<string, unknown>;
+import type { TableColumn, FormField, ModuleRow } from "@/lib/module-config";
 
 interface Props {
   title: string;
@@ -58,7 +56,11 @@ interface Props {
     edit: string;
     del: string;
   };
-  attach?: { module: AttachmentModule; title: string };
+  attach?: {
+    module: AttachmentModule;
+    title: string;
+    categories?: { key: string; label: string }[];
+  };
 }
 
 const stageStyles: Record<string, string> = {
@@ -95,6 +97,17 @@ function formatAmount(value: unknown) {
   const num = Number(value);
   if (isNaN(num)) return String(value);
   return num.toLocaleString("en-IN");
+}
+
+function formatDateString(value: unknown) {
+  if (!value) return "—";
+  const d = new Date(String(value));
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 export function ModuleTable({
@@ -229,6 +242,7 @@ export function ModuleTable({
   );
 
   const renderCell = (col: TableColumn, r: ModuleRow) => {
+    if (col.render) return col.render(r);
     if (col.key === "download") {
       return (
         <span className="inline-flex items-center justify-end gap-1 text-xs text-muted-foreground">
@@ -240,6 +254,7 @@ export function ModuleTable({
     const v = r[col.key];
     if (col.badge) return stageBadge(String(v ?? ""));
     if (col.format === "amount") return formatAmount(v);
+    if (col.format === "date") return formatDateString(v);
     if (v === null || v === undefined || v === "") return "—";
     return String(v);
   };

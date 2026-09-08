@@ -3,7 +3,7 @@
 import * as React from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { PackageOpen, Users, FileText, FileSignature, CreditCard } from "lucide-react"
+import { PackageOpen, Users, FileText, FileSignature, CreditCard, HardDrive, BadgeCheck, ClipboardList, LayoutGrid } from "lucide-react"
 
 import {
   Sidebar,
@@ -39,6 +39,18 @@ export function AppSidebar() {
     }
     if (can(user, "viewPayments")) {
       items.push({ title: "Payments", href: "/payments", icon: CreditCard });
+    }
+    if (can(user, "viewDataWiping")) {
+      items.push({ title: "Data Wiping", href: "/data-wiping", icon: HardDrive });
+    }
+    if (can(user, "viewCertificate")) {
+      items.push({ title: "Certificates", href: "/certificates", icon: BadgeCheck });
+    }
+    if (can(user, "viewGrn")) {
+      items.push({ title: "GRN", href: "/grn", icon: ClipboardList });
+    }
+    if (can(user, "viewConsolidated")) {
+      items.push({ title: "Consolidated", href: "/consolidated", icon: LayoutGrid });
     }
     if (can(user, "manageUsers")) {
       items.push({ title: "Users", href: "/users", icon: Users });

@@ -20,6 +20,9 @@ model PickupRequest {
   actualDeliveredDate             DateTime?
   files                           PickupFile[]
   quotes                          Quote[]
+  dataWipings                     DataWiping[]
+  certificates                    Certificate[]
+  grns                            Grn[]
   createdAt                       DateTime      @default(now())
   updatedAt                       DateTime      @updatedAt
 
@@ -98,6 +101,7 @@ model PickupFile {
   fileSize        Int
   mimeType        String
   storagePath     String
+  category        String?
   createdAt       DateTime       @default(now())
 
   @@index([pickupRequestId])
@@ -111,6 +115,7 @@ model QuoteFile {
   fileSize    Int
   mimeType    String
   storagePath String
+  category    String?
   createdAt   DateTime @default(now())
 
   @@index([quoteId])
@@ -124,6 +129,7 @@ model PurchaseOrderFile {
   fileSize        Int
   mimeType        String
   storagePath     String
+  category        String?
   createdAt       DateTime      @default(now())
 
   @@index([purchaseOrderId])
@@ -137,9 +143,121 @@ model PaymentFile {
   fileSize    Int
   mimeType    String
   storagePath String
+  category    String?
   createdAt   DateTime @default(now())
 
   @@index([paymentId])
+}
+
+model DataWiping {
+  id                String            @id @default(cuid())
+  status            String
+  sourcingDealNo    String
+  pickup            String?
+  dataWipingId      String?
+  laptop            Int?
+  desktop           Int?
+  total             Int?
+  laptopWiped       Int?
+  desktopWiped      Int?
+  laptopNotWiped    Int?
+  desktopNotWiped   Int?
+  pickupRequestId   String?
+  pickupRequest     PickupRequest?    @relation(fields: [pickupRequestId], references: [id], onDelete: SetNull)
+  files             DataWipingFile[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([sourcingDealNo])
+  @@index([status])
+}
+
+model DataWipingFile {
+  id            String       @id @default(cuid())
+  dataWipingId  String
+  dataWiping    DataWiping   @relation(fields: [dataWipingId], references: [id], onDelete: Cascade)
+  fileName      String
+  fileSize      Int
+  mimeType      String
+  storagePath   String
+  category      String?
+  createdAt     DateTime     @default(now())
+
+  @@index([dataWipingId])
+}
+
+model Certificate {
+  id              String            @id @default(cuid())
+  status          String
+  sourcingDealNo  String
+  pickup          String?
+  pickupRequestId String?
+  pickupRequest   PickupRequest?    @relation(fields: [pickupRequestId], references: [id], onDelete: SetNull)
+  files           CertificateFile[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([sourcingDealNo])
+  @@index([status])
+}
+
+model CertificateFile {
+  id             String       @id @default(cuid())
+  certificateId  String
+  certificate    Certificate  @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  fileName       String
+  fileSize       Int
+  mimeType       String
+  storagePath    String
+  category       String?
+  createdAt      DateTime     @default(now())
+
+  @@index([certificateId])
+}
+
+model Grn {
+  id                    String            @id @default(cuid())
+  stage                 String
+  sourcingDealNo        String
+  pickup                String?
+  grnDetails            String?
+  invoiceNumber         String?
+  invoiceDate           String?
+  materialReceivedDate  String?
+  pickupRequestId       String?
+  pickupRequest         PickupRequest?    @relation(fields: [pickupRequestId], references: [id], onDelete: SetNull)
+  files                 GrnFile[]
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  @@index([sourcingDealNo])
+  @@index([stage])
+}
+
+model GrnFile {
+  id          String  @id @default(cuid())
+  grnId       String
+  grn         Grn     @relation(fields: [grnId], references: [id], onDelete: Cascade)
+  fileName    String
+  fileSize    Int
+  mimeType    String
+  storagePath String
+  category    String?
+  createdAt   DateTime @default(now())
+
+  @@index([grnId])
+}
+
+model Consolidated {
+  id          String   @id @default(cuid())
+  category    String
+  subCategory String?
+  qty         Int?
+  amount      Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
 }
 
 model User {

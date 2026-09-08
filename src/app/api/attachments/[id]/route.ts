@@ -8,7 +8,15 @@ export const runtime = "nodejs";
 
 type Params = { params: Promise<{ id: string }> };
 
-const MODULES = ["quote", "purchase-order", "payment", "pickup"];
+const MODULES = [
+  "quote",
+  "purchase-order",
+  "payment",
+  "pickup",
+  "data-wiping",
+  "certificate",
+  "grn",
+];
 
 type FileRecord = {
   id: string;
@@ -28,6 +36,12 @@ async function findFileRecord(
       return prisma.paymentFile.findUnique({ where: { id } });
     case "pickup":
       return prisma.pickupFile.findUnique({ where: { id } });
+    case "data-wiping":
+      return prisma.dataWipingFile.findUnique({ where: { id } });
+    case "certificate":
+      return prisma.certificateFile.findUnique({ where: { id } });
+    case "grn":
+      return prisma.grnFile.findUnique({ where: { id } });
   }
 }
 
@@ -45,7 +59,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
 
   if (typeof moduleName !== "string" || !MODULES.includes(moduleName)) {
     return NextResponse.json(
-      { error: "module must be quote, purchase-order, payment or pickup" },
+      { error: "module must be a valid attachment module" },
       { status: 400 }
     );
   }
@@ -72,6 +86,15 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       break;
     case "pickup":
       await prisma.pickupFile.delete({ where: { id } });
+      break;
+    case "data-wiping":
+      await prisma.dataWipingFile.delete({ where: { id } });
+      break;
+    case "certificate":
+      await prisma.certificateFile.delete({ where: { id } });
+      break;
+    case "grn":
+      await prisma.grnFile.delete({ where: { id } });
       break;
   }
 

@@ -18,13 +18,17 @@ export interface AttachmentFile {
   fileSize: number;
   mimeType: string;
   storagePath: string;
+  category?: string;
 }
 
 export type AttachmentModule =
   | "quote"
   | "purchase-order"
   | "payment"
-  | "pickup";
+  | "pickup"
+  | "data-wiping"
+  | "certificate"
+  | "grn";
 
 interface Props {
   title: string;
@@ -32,6 +36,8 @@ interface Props {
   entityId: string;
   files: AttachmentFile[];
   onChanged: () => void;
+  category?: string;
+  uploadLabel?: string;
 }
 
 function formatSize(bytes: number) {
@@ -54,11 +60,15 @@ export function AttachmentSection({
   entityId,
   files,
   onChanged,
+  category,
+  uploadLabel,
 }: Props) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const shown = category ? files.filter((f) => f.category === category) : files;
 
   const handleFiles = async (selected: FileList | null) => {
     if (!selected || selected.length === 0) return;
@@ -73,6 +83,7 @@ export function AttachmentSection({
     const formData = new FormData();
     formData.append("module", module);
     formData.append("entityId", entityId);
+    if (category) formData.append("category", category);
     pick.forEach((f) => formData.append("files", f));
     try {
       const res = await fetch("/api/attachments", {
@@ -110,9 +121,9 @@ export function AttachmentSection({
     <div className="rounded-lg border border-border p-3">
       <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
         <Paperclip className="size-4" />
-        {title} Attachments
+        {uploadLabel ?? title}
         <span className="ml-auto text-xs font-normal text-muted-foreground">
-          {files.length} file{files.length === 1 ? "" : "s"}
+          {shown.length} file{shown.length === 1 ? "" : "s"}
         </span>
       </div>
 
@@ -124,10 +135,10 @@ export function AttachmentSection({
       )}
 
       <div className="mb-3 flex flex-col gap-2">
-        {files.length === 0 ? (
+        {shown.length === 0 ? (
           <p className="text-sm text-muted-foreground">No attachments yet.</p>
         ) : (
-          files.map((f) => (
+          shown.map((f) => (
             <div
               key={f.id}
               className="flex items-center gap-3 rounded-lg border border-border p-2.5"

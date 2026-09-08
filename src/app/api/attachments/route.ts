@@ -12,7 +12,15 @@ type SavedFile = {
   storagePath: string;
 };
 
-const MODULES = ["quote", "purchase-order", "payment", "pickup"] as const;
+const MODULES = [
+  "quote",
+  "purchase-order",
+  "payment",
+  "pickup",
+  "data-wiping",
+  "certificate",
+  "grn",
+] as const;
 export type AttachmentModule = (typeof MODULES)[number];
 
 async function entityMissing(module: AttachmentModule, entityId: string) {
@@ -29,6 +37,16 @@ async function entityMissing(module: AttachmentModule, entityId: string) {
       return !(await prisma.pickupRequest.findUnique({
         where: { id: entityId },
       }));
+    case "data-wiping":
+      return !(await prisma.dataWiping.findUnique({
+        where: { id: entityId },
+      }));
+    case "certificate":
+      return !(await prisma.certificate.findUnique({
+        where: { id: entityId },
+      }));
+    case "grn":
+      return !(await prisma.grn.findUnique({ where: { id: entityId } }));
   }
 }
 
@@ -49,6 +67,18 @@ async function createFileRecord(module: AttachmentModule, entityId: string, f: S
     case "pickup":
       return prisma.pickupFile.create({
         data: { pickupRequestId: entityId, ...f },
+      });
+    case "data-wiping":
+      return prisma.dataWipingFile.create({
+        data: { dataWipingId: entityId, ...f },
+      });
+    case "certificate":
+      return prisma.certificateFile.create({
+        data: { certificateId: entityId, ...f },
+      });
+    case "grn":
+      return prisma.grnFile.create({
+        data: { grnId: entityId, ...f },
       });
   }
 }
@@ -82,6 +112,12 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
+
+  const rawCategory = formData.get("category");
+  const category =
+    typeof rawCategory === "string" && rawCategory.trim() !== ""
+      ? rawCategory.trim().slice(0, 50)
+      : undefined;
 
   if (await entityMissing(moduleName as AttachmentModule, entityId)) {
     return NextResponse.json(
@@ -118,7 +154,10 @@ export async function POST(request: NextRequest) {
   const records = [];
   for (const f of saved) {
     records.push(
-      await createFileRecord(moduleName as AttachmentModule, entityId, f)
+      await createFileRecord(moduleName as AttachmentModule, entityId, {
+        ...f,
+        ...(category ? { category } : {}),
+      })
     );
   }
 

@@ -51,13 +51,25 @@ export async function proxy(request: NextRequest) {
   if (
     pathname.startsWith("/quotes") ||
     pathname.startsWith("/purchase-orders") ||
-    pathname.startsWith("/payments")
+    pathname.startsWith("/payments") ||
+    pathname.startsWith("/data-wiping") ||
+    pathname.startsWith("/certificates") ||
+    pathname.startsWith("/grn") ||
+    pathname.startsWith("/consolidated")
   ) {
     const perm = pathname.startsWith("/quotes")
       ? "viewQuotes"
       : pathname.startsWith("/purchase-orders")
         ? "viewPurchaseOrders"
-        : "viewPayments";
+        : pathname.startsWith("/payments")
+          ? "viewPayments"
+          : pathname.startsWith("/data-wiping")
+            ? "viewDataWiping"
+            : pathname.startsWith("/certificates")
+              ? "viewCertificate"
+              : pathname.startsWith("/grn")
+                ? "viewGrn"
+                : "viewConsolidated";
     if (!user.permissions[perm as keyof typeof user.permissions]) {
       return NextResponse.redirect(new URL("/pickup-request", baseUrl));
     }

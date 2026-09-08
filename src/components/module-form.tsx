@@ -26,7 +26,11 @@ interface Props {
   fields: FormField[];
   apiPath: string;
   title: string;
-  attach?: { module: AttachmentModule; title: string } | null;
+  attach?: {
+    module: AttachmentModule;
+    title: string;
+    categories?: { key: string; label: string }[];
+  } | null;
   onSaved: () => void;
 }
 
@@ -148,7 +152,7 @@ export function ModuleForm({
                 {f.required ? " *" : ""}
               </label>
               <Input
-                type={f.inputType === "number" ? "number" : "text"}
+                type={f.inputType === "number" ? "number" : f.inputType === "date" ? "date" : "text"}
                 value={values[f.key] ?? ""}
                 onChange={(e) => set(f.key, e.target.value)}
                 placeholder={f.placeholder}
@@ -156,13 +160,27 @@ export function ModuleForm({
             </div>
           ))}
           {mode === "edit" && attach && typeof initial?.id === "string" && (
-            <AttachmentSection
-              title={attach.title}
-              module={attach.module}
-              entityId={String(initial.id)}
-              files={files}
-              onChanged={refreshFiles}
-            />
+            attach.categories && attach.categories.length > 0 ? (
+              attach.categories.map((cat) => (
+                <AttachmentSection
+                  key={cat.key}
+                  title={`${attach.title} — ${cat.label}`}
+                  module={attach.module}
+                  entityId={String(initial.id)}
+                  files={files}
+                  category={cat.key}
+                  onChanged={refreshFiles}
+                />
+              ))
+            ) : (
+              <AttachmentSection
+                title={attach.title}
+                module={attach.module}
+                entityId={String(initial.id)}
+                files={files}
+                onChanged={refreshFiles}
+              />
+            )
           )}
 
           {error && (

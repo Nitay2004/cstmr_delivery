@@ -105,6 +105,12 @@ export const toFloat = (value: string): number | undefined => {
   return isNaN(num) ? undefined : num;
 };
 
+export const toInt = (value: string): number | undefined => {
+  if (!value) return undefined;
+  const num = Math.round(Number(value.replace(/,/g, "").replace(/\s/g, "")));
+  return isNaN(num) ? undefined : num;
+};
+
 export type QuoteCsvData = {
   stage: string;
   sourcingDealNo: string;
@@ -169,5 +175,91 @@ export function rowToPaymentData(row: CsvRow): PaymentCsvData {
     totalInvoiceAmount: toFloat(n["totalinvoiceamount"] ?? ""),
     totalPaymentDone: toFloat(n["totalpaymentdone"] ?? ""),
     balanceAmount: toFloat(n["balanceamount"] ?? ""),
+  };
+}
+
+export type DataWipingCsvData = {
+  status: string;
+  sourcingDealNo: string;
+  pickup?: string;
+  dataWipingId?: string;
+  laptop?: number;
+  desktop?: number;
+  total?: number;
+  laptopWiped?: number;
+  desktopWiped?: number;
+  laptopNotWiped?: number;
+  desktopNotWiped?: number;
+};
+
+export function rowToDataWipingData(row: CsvRow): DataWipingCsvData {
+  const n = normalizeRow(row);
+  return {
+    status: n["status"] ?? "",
+    sourcingDealNo: n["sourcingdealno"] ?? "",
+    pickup: n["pickup"] || undefined,
+    dataWipingId: n["datawipingid"] || undefined,
+    laptop: toInt(n["laptop"] ?? ""),
+    desktop: toInt(n["desktop"] ?? ""),
+    total: toInt(n["total"] ?? ""),
+    laptopWiped: toInt(n["laptopwiped"] ?? ""),
+    desktopWiped: toInt(n["desktopwiped"] ?? ""),
+    laptopNotWiped: toInt(n["laptopnotwiped"] ?? ""),
+    desktopNotWiped: toInt(n["desktopnotwiped"] ?? ""),
+  };
+}
+
+export type CertificateCsvData = {
+  status: string;
+  sourcingDealNo: string;
+  pickup?: string;
+};
+
+export function rowToCertificateData(row: CsvRow): CertificateCsvData {
+  const n = normalizeRow(row);
+  return {
+    status: n["status"] ?? "",
+    sourcingDealNo: n["sourcingdealno"] ?? "",
+    pickup: n["pickup"] || undefined,
+  };
+}
+
+export type GrnCsvData = {
+  stage: string;
+  sourcingDealNo: string;
+  pickup?: string;
+  grnDetails?: string;
+  invoiceNumber?: string;
+  invoiceDate?: string;
+  materialReceivedDate?: string;
+};
+
+export function rowToGrnData(row: CsvRow): GrnCsvData {
+  const n = normalizeRow(row);
+  return {
+    stage: n["stage"] ?? "",
+    sourcingDealNo: n["sourcingdealno"] ?? "",
+    pickup: n["pickup"] || undefined,
+    grnDetails: n["grndetails"] || undefined,
+    invoiceNumber: n["invoicenumber"] || undefined,
+    invoiceDate: n["invoicedate"] || undefined,
+    materialReceivedDate: n["materialreceiveddate"] || undefined,
+  };
+}
+
+export type ConsolidatedCsvData = {
+  category: string;
+  subCategory?: string;
+  qty?: number;
+  amount?: number;
+};
+
+export function rowToConsolidatedData(row: CsvRow): ConsolidatedCsvData {
+  const n = normalizeRow(row);
+  return {
+    category: n["category"] ?? "",
+    subCategory: n["subcategory"] || undefined,
+    qty: toInt(n["qty"] ?? ""),
+    amount: toFloat(n["amount"] ?? ""),
   };
 }
