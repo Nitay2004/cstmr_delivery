@@ -43,9 +43,15 @@ export async function POST(request: NextRequest) {
   const normalizedHeaders = headers.map((h) =>
     h.trim().toLowerCase().replace(/\s+/g, "").replace(/[^a-z0-9]/g, "")
   );
-  const missing = ["stage", "sourcingdealno"].filter(
-    (h) => !normalizedHeaders.includes(h)
-  );
+  const missing: string[] = [];
+  const hasStage =
+    normalizedHeaders.includes("stage") || normalizedHeaders.includes("postage");
+  if (!hasStage) {
+    missing.push("stage");
+  }
+  if (!normalizedHeaders.includes("sourcingdealno")) {
+    missing.push("sourcingdealno");
+  }
 
   if (missing.length > 0) {
     return NextResponse.json(
