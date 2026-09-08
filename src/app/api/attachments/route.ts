@@ -12,7 +12,7 @@ type SavedFile = {
   storagePath: string;
 };
 
-const MODULES = ["quote", "purchase-order", "payment"] as const;
+const MODULES = ["quote", "purchase-order", "payment", "pickup"] as const;
 export type AttachmentModule = (typeof MODULES)[number];
 
 async function entityMissing(module: AttachmentModule, entityId: string) {
@@ -25,6 +25,10 @@ async function entityMissing(module: AttachmentModule, entityId: string) {
       }));
     case "payment":
       return !(await prisma.payment.findUnique({ where: { id: entityId } }));
+    case "pickup":
+      return !(await prisma.pickupRequest.findUnique({
+        where: { id: entityId },
+      }));
   }
 }
 
@@ -41,6 +45,10 @@ async function createFileRecord(module: AttachmentModule, entityId: string, f: S
     case "payment":
       return prisma.paymentFile.create({
         data: { paymentId: entityId, ...f },
+      });
+    case "pickup":
+      return prisma.pickupFile.create({
+        data: { pickupRequestId: entityId, ...f },
       });
   }
 }
@@ -64,7 +72,7 @@ export async function POST(request: NextRequest) {
     !(MODULES as readonly string[]).includes(moduleName)
   ) {
     return NextResponse.json(
-      { error: "module must be quote, purchase-order or payment" },
+      { error: "module must be quote, purchase-order, payment or pickup" },
       { status: 400 }
     );
   }

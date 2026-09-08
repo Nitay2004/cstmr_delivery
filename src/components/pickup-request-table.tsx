@@ -165,6 +165,7 @@ export function PickupRequestTable() {
       location: r.location ?? "",
       actualPickupDate: r.actualPickupDate ?? "",
       actualDeliveredDate: r.actualDeliveredDate ?? "",
+      files: r.files,
     });
     setFormOpen(true);
   };

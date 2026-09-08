@@ -20,7 +20,11 @@ export interface AttachmentFile {
   storagePath: string;
 }
 
-export type AttachmentModule = "quote" | "purchase-order" | "payment";
+export type AttachmentModule =
+  | "quote"
+  | "purchase-order"
+  | "payment"
+  | "pickup";
 
 interface Props {
   title: string;

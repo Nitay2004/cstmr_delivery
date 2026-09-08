@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 
 type Params = { params: Promise<{ id: string }> };
 
-const MODULES = ["quote", "purchase-order", "payment"];
+const MODULES = ["quote", "purchase-order", "payment", "pickup"];
 
 type FileRecord = {
   id: string;
@@ -26,6 +26,8 @@ async function findFileRecord(
       return prisma.purchaseOrderFile.findUnique({ where: { id } });
     case "payment":
       return prisma.paymentFile.findUnique({ where: { id } });
+    case "pickup":
+      return prisma.pickupFile.findUnique({ where: { id } });
   }
 }
 
@@ -43,7 +45,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
 
   if (typeof moduleName !== "string" || !MODULES.includes(moduleName)) {
     return NextResponse.json(
-      { error: "module must be quote, purchase-order or payment" },
+      { error: "module must be quote, purchase-order, payment or pickup" },
       { status: 400 }
     );
   }
@@ -67,6 +69,9 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       break;
     case "payment":
       await prisma.paymentFile.delete({ where: { id } });
+      break;
+    case "pickup":
+      await prisma.pickupFile.delete({ where: { id } });
       break;
   }
 

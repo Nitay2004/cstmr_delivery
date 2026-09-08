@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { randomUUID } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { isAllowedFile, saveUploadedFile } from "@/lib/files";
 
 export const runtime = "nodejs";
-
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
 export async function POST(request: NextRequest) {
   const user = await getCurrentUser(request);
@@ -48,7 +44,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
+  const rejected = validFiles.filter((f) => !isAllowedFile(f));
+  if (rejected.length > 0) {
+    return NextResponse.json(
+      {
+        error: `Only PDF, JPG, JPEG and PNG files are allowed (rejected: ${rejected
+          .map((f) => f.name)
+          .join(", ")})`,
+      },
+      { status: 400 }
+    );
+  }
 
   const saved: {
     fileName: string;
@@ -58,18 +64,7 @@ export async function POST(request: NextRequest) {
   }[] = [];
 
   for (const file of validFiles) {
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const ext = path.extname(file.name);
-    const storeName = `${randomUUID()}${ext}`;
-    const storagePath = path.join(UPLOAD_DIR, storeName);
-    await writeFile(storagePath, buffer);
-
-    saved.push({
-      fileName: file.name,
-      fileSize: file.size,
-      mimeType: file.type || "application/octet-stream",
-      storagePath: `/uploads/${storeName}`,
-    });
+    saved.push(await saveUploadedFile(file));
   }
 
   const records = await Promise.all(

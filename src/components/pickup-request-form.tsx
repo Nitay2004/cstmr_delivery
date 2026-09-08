@@ -11,6 +11,11 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { AlertCircle, Loader2, Save } from "lucide-react";
+import {
+  AttachmentSection,
+  type AttachmentFile,
+} from "@/components/attachment-section";
+import { useUser, can } from "@/components/user-provider";
 
 export interface PickupRequestFormValues {
   id?: string;
@@ -20,6 +25,7 @@ export interface PickupRequestFormValues {
   location: string;
   actualPickupDate: string;
   actualDeliveredDate: string;
+  files?: AttachmentFile[];
 }
 
 interface Props {
@@ -52,6 +58,12 @@ export function PickupRequestForm({
   initial,
   onSaved,
 }: Props) {
+  const { user } = useUser();
+  const canUpload = can(user, "uploadFiles");
+  const [files, setFiles] = useState<AttachmentFile[]>(() => {
+    const raw = initial?.files;
+    return Array.isArray(raw) ? (raw as AttachmentFile[]) : [];
+  });
   const [values, setValues] = useState<PickupRequestFormValues>(() => {
     if (!initial) return empty;
     return {
@@ -68,6 +80,22 @@ export function PickupRequestForm({
 
   const set = (key: keyof PickupRequestFormValues, value: string) =>
     setValues((v) => ({ ...v, [key]: value }));
+
+  const refreshFiles = async () => {
+    if (!initial?.id) return;
+    try {
+      const res = await fetch("/api/pickup-requests");
+      const data = await res.json();
+      const row = (data.requests as
+        | { id: string; files?: unknown }[]
+        | undefined)?.find((r) => r.id === initial.id);
+      if (row && Array.isArray(row.files)) {
+        setFiles(row.files as AttachmentFile[]);
+      }
+    } catch {
+      // ignore refresh errors; files stay unchanged
+    }
+  };
 
   const handleSubmit = async () => {
     if (!values.stage.trim() || !values.sourcingDealNo.trim()) {
@@ -167,6 +195,16 @@ export function PickupRequestForm({
               onChange={(e) => set("actualDeliveredDate", e.target.value)}
             />
           </div>
+
+          {mode === "edit" && canUpload && typeof initial?.id === "string" && (
+            <AttachmentSection
+              title="Pickup Request"
+              module="pickup"
+              entityId={String(initial.id)}
+              files={files}
+              onChanged={refreshFiles}
+            />
+          )}
 
           {error && (
             <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
