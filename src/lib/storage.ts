@@ -1,19 +1,22 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+let _client: SupabaseClient | null = null;
+
 export const STORAGE_BUCKET =
   process.env.SUPABASE_STORAGE_BUCKET ?? "attachments";
 
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-  throw new Error(
-    "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your environment."
-  );
+function getClient(): SupabaseClient {
+  if (_client) return _client;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    throw new Error(
+      "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your environment."
+    );
+  }
+  _client = createClient(url, key, { auth: { persistSession: false } });
+  return _client;
 }
-
-export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: { persistSession: false },
-});
 
 export type SavedFile = {
   fileName: string;
@@ -22,10 +25,7 @@ export type SavedFile = {
   storagePath: string;
 };
 
-export function buildStoragePath(
-  folder: string,
-  ext: string
-): string {
+export function buildStoragePath(folder: string, ext: string): string {
   const id =
     typeof crypto !== "undefined" && "randomUUID" in crypto
       ? crypto.randomUUID()
@@ -34,9 +34,7 @@ export function buildStoragePath(
 }
 
 export function getPublicUrl(path: string): string {
-  const { data } = supabase.storage
-    .from(STORAGE_BUCKET)
-    .getPublicUrl(path);
+  const { data } = getClient().storage.from(STORAGE_BUCKET).getPublicUrl(path);
   return data.publicUrl;
 }
 
@@ -49,8 +47,8 @@ export async function uploadFile(
   const ext = extMatch ? `.${extMatch[1].toLowerCase()}` : "";
   const storagePath = buildStoragePath(folder, ext);
 
-  const { error } = await supabase.storage
-    .from(STORAGE_BUCKET)
+  const { error } = await getClient()
+    .storage.from(STORAGE_BUCKET)
     .upload(storagePath, buffer, {
       contentType: file.type || "application/octet-stream",
       upsert: false,
@@ -70,9 +68,9 @@ export async function uploadFile(
 
 export async function deleteFileByPath(storagePath: string): Promise<void> {
   if (!storagePath) return;
-  // Extract the object key from a public URL if present.
   const marker = "/object/public/";
   const idx = storagePath.lastIndexOf(marker);
-  const objectKey = idx !== -1 ? storagePath.slice(idx + marker.length) : storagePath;
-  await supabase.storage.from(STORAGE_BUCKET).remove([objectKey]);
+  const objectKey =
+    idx !== -1 ? storagePath.slice(idx + marker.length) : storagePath;
+  await getClient().storage.from(STORAGE_BUCKET).remove([objectKey]);
 }
