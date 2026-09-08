@@ -68,6 +68,7 @@ export default function PurchaseOrdersPage() {
         title="Purchase Orders"
         singular="Purchase Order"
         apiPath="/api/purchase-orders"
+        listKey="orders"
         columns={columns}
         formFields={formFields}
         searchFields={[

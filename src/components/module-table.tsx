@@ -47,6 +47,7 @@ interface Props {
   title: string;
   singular: string;
   apiPath: string;
+  listKey?: string;
   columns: TableColumn[];
   formFields: FormField[];
   searchFields?: string[];
@@ -98,6 +99,7 @@ export function ModuleTable({
   title,
   singular,
   apiPath,
+  listKey,
   columns,
   formFields,
   searchFields = [],
@@ -134,7 +136,7 @@ export function ModuleTable({
           ? data.items
           : Array.isArray(data.rows)
             ? data.rows
-            : data[singular === "Quote" ? "quotes" : `${singular.toLowerCase()}s`] ??
+            : data[listKey ?? (singular === "Quote" ? "quotes" : `${singular.toLowerCase()}s`)] ??
               [];
         if (Array.isArray(list)) setRows(list);
       })
@@ -147,7 +149,7 @@ export function ModuleTable({
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [apiPath, singular]);
+  }, [apiPath, singular, listKey]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -160,7 +162,7 @@ export function ModuleTable({
         ? data.items
         : Array.isArray(data.rows)
           ? data.rows
-          : data[singular === "Quote" ? "quotes" : `${singular.toLowerCase()}s`] ??
+          : data[listKey ?? (singular === "Quote" ? "quotes" : `${singular.toLowerCase()}s`)] ??
             [];
       if (Array.isArray(list)) setRows(list);
     } catch (err) {
@@ -168,7 +170,7 @@ export function ModuleTable({
     } finally {
       setLoading(false);
     }
-  }, [apiPath, singular]);
+  }, [apiPath, singular, listKey]);
 
   const openCreate = () => {
     setFormMode("create");
