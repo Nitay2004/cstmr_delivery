@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
 
   const payments = await prisma.payment.findMany({
     orderBy: { createdAt: "desc" },
+    include: { files: true },
   });
   const total = await prisma.payment.count();
 

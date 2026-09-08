@@ -39,6 +39,7 @@ model Quote {
   pickupRequestId String?
   pickupRequest   PickupRequest?    @relation(fields: [pickupRequestId], references: [id], onDelete: SetNull)
   purchaseOrders  PurchaseOrder[]
+  files           QuoteFile[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 
@@ -58,6 +59,7 @@ model PurchaseOrder {
   quoteId         String?
   quote           Quote?            @relation(fields: [quoteId], references: [id], onDelete: SetNull)
   payments        Payment[]
+  files           PurchaseOrderFile[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 
@@ -79,6 +81,7 @@ model Payment {
   balanceAmount      Float?
   purchaseOrderId    String?
   purchaseOrder      PurchaseOrder?    @relation(fields: [purchaseOrderId], references: [id], onDelete: SetNull)
+  files              PaymentFile[]
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
 
@@ -98,6 +101,45 @@ model PickupFile {
   createdAt       DateTime       @default(now())
 
   @@index([pickupRequestId])
+}
+
+model QuoteFile {
+  id          String  @id @default(cuid())
+  quoteId     String
+  quote       Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  fileName    String
+  fileSize    Int
+  mimeType    String
+  storagePath String
+  createdAt   DateTime @default(now())
+
+  @@index([quoteId])
+}
+
+model PurchaseOrderFile {
+  id              String        @id @default(cuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  fileName        String
+  fileSize        Int
+  mimeType        String
+  storagePath     String
+  createdAt       DateTime      @default(now())
+
+  @@index([purchaseOrderId])
+}
+
+model PaymentFile {
+  id          String  @id @default(cuid())
+  paymentId   String
+  payment     Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  fileName    String
+  fileSize    Int
+  mimeType    String
+  storagePath String
+  createdAt   DateTime @default(now())
+
+  @@index([paymentId])
 }
 
 model User {

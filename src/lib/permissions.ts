@@ -239,7 +239,7 @@ export const PERMISSION_DEFS: {
   {
     key: "uploadFiles",
     label: "Upload Files",
-    description: "Attach files to pickup requests.",
+    description: "Attach files (PDF, JPG/PNG) to quotes, purchase orders, payments and pickup requests.",
   },
   {
     key: "manageUsers",

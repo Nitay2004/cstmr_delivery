@@ -82,6 +82,7 @@ export default function QuotesPage() {
           edit: "editQuote",
           del: "deleteQuote",
         }}
+        attach={{ module: "quote", title: "Quote" }}
       />
     </div>
   );

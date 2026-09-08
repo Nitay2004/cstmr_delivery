@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
 
   const quotes = await prisma.quote.findMany({
     orderBy: { createdAt: "desc" },
+    include: { files: true },
   });
   const total = await prisma.quote.count();
 

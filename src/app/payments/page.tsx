@@ -116,6 +116,7 @@ export default function PaymentsPage() {
           edit: "editPayment",
           del: "deletePayment",
         }}
+        attach={{ module: "payment", title: "Payment" }}
       />
     </div>
   );

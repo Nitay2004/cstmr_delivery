@@ -85,6 +85,7 @@ export default function PurchaseOrdersPage() {
           edit: "editPurchaseOrder",
           del: "deletePurchaseOrder",
         }}
+        attach={{ module: "purchase-order", title: "Purchase Order" }}
       />
     </div>
   );
