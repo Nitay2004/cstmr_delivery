@@ -28,7 +28,6 @@ import {
   Pencil,
   Trash2,
   Download,
-  Paperclip,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -39,11 +38,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { ModuleForm } from "@/components/module-form";
-import {
-  AttachmentDialog,
-  type AttachmentFile,
-  type AttachmentModule,
-} from "@/components/attachment-dialog";
+import type { AttachmentModule } from "@/components/attachment-section";
 import { useUser, can } from "@/components/user-provider";
 import type { TableColumn, FormField } from "@/lib/module-config";
 
@@ -134,7 +129,6 @@ export function ModuleTable({
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [attachRow, setAttachRow] = useState<ModuleRow | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -388,25 +382,7 @@ export function ModuleTable({
                         <Trash2 className="size-4" />
                       </Button>
                     )}
-                    {attach && canUpload && (
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => setAttachRow(r)}
-                        aria-label={`Attach files to ${String(r.sourcingDealNo ?? r.id)}`}
-                      >
-                        <span className="relative">
-                          <Paperclip className="size-4" />
-                          {Array.isArray(r.files) &&
-                            (r.files as AttachmentFile[]).length > 0 && (
-                              <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-0.5 text-[9px] font-semibold text-primary-foreground">
-                                {(r.files as AttachmentFile[]).length}
-                              </span>
-                            )}
-                        </span>
-                      </Button>
-                    )}
-                    {!canEdit && !canDelete && !(attach && canUpload) && (
+                    {!canEdit && !canDelete && (
                       <span className="text-muted-foreground/50">—</span>
                     )}
                   </div>
@@ -500,27 +476,9 @@ export function ModuleTable({
         fields={formFields}
         apiPath={apiPath}
         title={singular}
+        attach={canUpload ? attach : null}
         onSaved={handleSaved}
       />
-
-      {attach && (
-        <AttachmentDialog
-          key={attachRow?.id}
-          open={!!attachRow}
-          onOpenChange={(o) => {
-            if (!o) setAttachRow(null);
-          }}
-          title={attach.title}
-          module={attach.module}
-          entityId={attachRow?.id ?? ""}
-          files={
-            attachRow && Array.isArray(attachRow.files)
-              ? (attachRow.files as AttachmentFile[])
-              : []
-          }
-          onChanged={load}
-        />
-      )}
 
       <Sheet
         open={!!deleteId}

@@ -12,6 +12,11 @@ import {
 } from "@/components/ui/sheet";
 import { AlertCircle, Loader2, Save } from "lucide-react";
 import type { FormField } from "@/lib/module-config";
+import {
+  AttachmentSection,
+  type AttachmentFile,
+  type AttachmentModule,
+} from "@/components/attachment-section";
 
 interface Props {
   open: boolean;
@@ -21,6 +26,7 @@ interface Props {
   fields: FormField[];
   apiPath: string;
   title: string;
+  attach?: { module: AttachmentModule; title: string } | null;
   onSaved: () => void;
 }
 
@@ -32,8 +38,13 @@ export function ModuleForm({
   fields,
   apiPath,
   title,
+  attach,
   onSaved,
 }: Props) {
+  const [files, setFiles] = useState<AttachmentFile[]>(() => {
+    const raw = initial?.files;
+    return Array.isArray(raw) ? (raw as AttachmentFile[]) : [];
+  });
   const [values, setValues] = useState<Record<string, string>>(() => {
     const v: Record<string, string> = {};
     for (const f of fields) {
@@ -49,6 +60,29 @@ export function ModuleForm({
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const refreshFiles = async () => {
+    if (!initial?.id) return;
+    try {
+      const res = await fetch(apiPath);
+      const data = await res.json();
+      const list = Array.isArray(data.items)
+        ? data.items
+        : Array.isArray(data.rows)
+          ? data.rows
+          : ["quotes", "orders", "payments"]
+              .map((k) => data[k])
+              .find((v) => Array.isArray(v)) ?? [];
+      const row = (list as { id: string; files?: unknown }[]).find(
+        (r) => r.id === initial.id
+      );
+      if (row && Array.isArray(row.files)) {
+        setFiles(row.files as AttachmentFile[]);
+      }
+    } catch {
+      // ignore refresh errors; files stay unchanged
+    }
+  };
 
   const set = (key: string, value: string) =>
     setValues((v) => ({ ...v, [key]: value }));
@@ -121,6 +155,15 @@ export function ModuleForm({
               />
             </div>
           ))}
+          {mode === "edit" && attach && typeof initial?.id === "string" && (
+            <AttachmentSection
+              title={attach.title}
+              module={attach.module}
+              entityId={String(initial.id)}
+              files={files}
+              onChanged={refreshFiles}
+            />
+          )}
 
           {error && (
             <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
