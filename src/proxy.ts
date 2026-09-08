@@ -37,6 +37,21 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  if (
+    pathname.startsWith("/quotes") ||
+    pathname.startsWith("/purchase-orders") ||
+    pathname.startsWith("/payments")
+  ) {
+    const perm = pathname.startsWith("/quotes")
+      ? "viewQuotes"
+      : pathname.startsWith("/purchase-orders")
+        ? "viewPurchaseOrders"
+        : "viewPayments";
+    if (!user.permissions[perm as keyof typeof user.permissions]) {
+      return NextResponse.redirect(new URL("/pickup-request", request.url));
+    }
+  }
+
   return NextResponse.next();
 }
 

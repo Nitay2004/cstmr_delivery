@@ -90,3 +90,84 @@ export function rowToPickupData(row: CsvRow): {
       toDate(normalized["actualdelivereddate"] ?? "") ?? undefined,
   };
 }
+
+export function normalizeRow(row: CsvRow): Record<string, string> {
+  const normalized: Record<string, string> = {};
+  Object.entries(row).forEach(([key, value]) => {
+    normalized[normalizeHeader(key)] = (value ?? "").trim();
+  });
+  return normalized;
+}
+
+export const toFloat = (value: string): number | undefined => {
+  if (!value) return undefined;
+  const num = Number(value.replace(/,/g, "").replace(/\s/g, ""));
+  return isNaN(num) ? undefined : num;
+};
+
+export type QuoteCsvData = {
+  stage: string;
+  sourcingDealNo: string;
+  pickup?: string;
+  quoteNo?: string;
+  totalAmount?: number;
+  locationCode?: string;
+};
+
+export function rowToQuoteData(row: CsvRow): QuoteCsvData {
+  const n = normalizeRow(row);
+  return {
+    stage: n["quotestage"] ?? n["stage"] ?? "",
+    sourcingDealNo: n["sourcingdealno"] ?? "",
+    pickup: n["pickupnumber"] ?? (n["pickup"] || undefined),
+    quoteNo: n["quoteno"] || undefined,
+    totalAmount: toFloat(n["totalamount"] ?? ""),
+    locationCode: n["locationcode"] || undefined,
+  };
+}
+
+export type PurchaseOrderCsvData = {
+  stage: string;
+  sourcingDealNo: string;
+  pickup?: string;
+  quoteNo?: string;
+  purchaseOrderNo?: string;
+  locationCode?: string;
+};
+
+export function rowToPurchaseOrderData(row: CsvRow): PurchaseOrderCsvData {
+  const n = normalizeRow(row);
+  return {
+    stage: n["postage"] ?? n["stage"] ?? "",
+    sourcingDealNo: n["sourcingdealno"] ?? "",
+    pickup: n["pickup"] || undefined,
+    quoteNo: n["quote"] || undefined,
+    purchaseOrderNo: n["purchaseorder"] || undefined,
+    locationCode: n["locationcode"] || undefined,
+  };
+}
+
+export type PaymentCsvData = {
+  stage: string;
+  sourcingDealNo: string;
+  pickup?: string;
+  purchaseOrderNo?: string;
+  payment?: string;
+  totalInvoiceAmount?: number;
+  totalPaymentDone?: number;
+  balanceAmount?: number;
+};
+
+export function rowToPaymentData(row: CsvRow): PaymentCsvData {
+  const n = normalizeRow(row);
+  return {
+    stage: n["stage"] ?? "",
+    sourcingDealNo: n["sourcingdealno"] ?? "",
+    pickup: n["pickup"] || undefined,
+    purchaseOrderNo: n["purchaseorderno"] || undefined,
+    payment: n["payment"] || undefined,
+    totalInvoiceAmount: toFloat(n["totalinvoiceamount"] ?? ""),
+    totalPaymentDone: toFloat(n["totalpaymentdone"] ?? ""),
+    balanceAmount: toFloat(n["balanceamount"] ?? ""),
+  };
+}

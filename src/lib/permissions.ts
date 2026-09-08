@@ -6,6 +6,21 @@ export interface Permissions {
   editPickupRequest: boolean;
   deletePickupRequest: boolean;
   importPickupRequests: boolean;
+  viewQuotes: boolean;
+  createQuote: boolean;
+  editQuote: boolean;
+  deleteQuote: boolean;
+  importQuotes: boolean;
+  viewPurchaseOrders: boolean;
+  createPurchaseOrder: boolean;
+  editPurchaseOrder: boolean;
+  deletePurchaseOrder: boolean;
+  importPurchaseOrders: boolean;
+  viewPayments: boolean;
+  createPayment: boolean;
+  editPayment: boolean;
+  deletePayment: boolean;
+  importPayments: boolean;
   uploadFiles: boolean;
   manageUsers: boolean;
 }
@@ -19,6 +34,21 @@ export function emptyPermissions(): Permissions {
     editPickupRequest: false,
     deletePickupRequest: false,
     importPickupRequests: false,
+    viewQuotes: false,
+    createQuote: false,
+    editQuote: false,
+    deleteQuote: false,
+    importQuotes: false,
+    viewPurchaseOrders: false,
+    createPurchaseOrder: false,
+    editPurchaseOrder: false,
+    deletePurchaseOrder: false,
+    importPurchaseOrders: false,
+    viewPayments: false,
+    createPayment: false,
+    editPayment: false,
+    deletePayment: false,
+    importPayments: false,
     uploadFiles: false,
     manageUsers: false,
   };
@@ -31,6 +61,21 @@ export const ROLE_PRESETS: Record<Role, Permissions> = {
     editPickupRequest: true,
     deletePickupRequest: true,
     importPickupRequests: true,
+    viewQuotes: true,
+    createQuote: true,
+    editQuote: true,
+    deleteQuote: true,
+    importQuotes: true,
+    viewPurchaseOrders: true,
+    createPurchaseOrder: true,
+    editPurchaseOrder: true,
+    deletePurchaseOrder: true,
+    importPurchaseOrders: true,
+    viewPayments: true,
+    createPayment: true,
+    editPayment: true,
+    deletePayment: true,
+    importPayments: true,
     uploadFiles: true,
     manageUsers: true,
   },
@@ -40,6 +85,21 @@ export const ROLE_PRESETS: Record<Role, Permissions> = {
     editPickupRequest: true,
     deletePickupRequest: false,
     importPickupRequests: true,
+    viewQuotes: true,
+    createQuote: true,
+    editQuote: true,
+    deleteQuote: false,
+    importQuotes: true,
+    viewPurchaseOrders: true,
+    createPurchaseOrder: true,
+    editPurchaseOrder: true,
+    deletePurchaseOrder: false,
+    importPurchaseOrders: true,
+    viewPayments: true,
+    createPayment: true,
+    editPayment: true,
+    deletePayment: false,
+    importPayments: true,
     uploadFiles: true,
     manageUsers: false,
   },
@@ -49,6 +109,21 @@ export const ROLE_PRESETS: Record<Role, Permissions> = {
     editPickupRequest: false,
     deletePickupRequest: false,
     importPickupRequests: false,
+    viewQuotes: true,
+    createQuote: false,
+    editQuote: false,
+    deleteQuote: false,
+    importQuotes: false,
+    viewPurchaseOrders: true,
+    createPurchaseOrder: false,
+    editPurchaseOrder: false,
+    deletePurchaseOrder: false,
+    importPurchaseOrders: false,
+    viewPayments: true,
+    createPayment: false,
+    editPayment: false,
+    deletePayment: false,
+    importPayments: false,
     uploadFiles: false,
     manageUsers: false,
   },
@@ -83,8 +158,83 @@ export const PERMISSION_DEFS: {
   },
   {
     key: "importPickupRequests",
-    label: "Bulk Import",
+    label: "Bulk Import Pickup Requests",
     description: "Import pickup requests from CSV/Excel.",
+  },
+  {
+    key: "viewQuotes",
+    label: "View Quotes",
+    description: "See the quotes page and data.",
+  },
+  {
+    key: "createQuote",
+    label: "Create Quotes",
+    description: "Create new quote records.",
+  },
+  {
+    key: "editQuote",
+    label: "Edit Quotes",
+    description: "Edit existing quotes.",
+  },
+  {
+    key: "deleteQuote",
+    label: "Delete Quotes",
+    description: "Delete existing quotes.",
+  },
+  {
+    key: "importQuotes",
+    label: "Bulk Import Quotes",
+    description: "Import quotes from CSV/Excel.",
+  },
+  {
+    key: "viewPurchaseOrders",
+    label: "View Purchase Orders",
+    description: "See the purchase orders page and data.",
+  },
+  {
+    key: "createPurchaseOrder",
+    label: "Create Purchase Orders",
+    description: "Create new purchase order records.",
+  },
+  {
+    key: "editPurchaseOrder",
+    label: "Edit Purchase Orders",
+    description: "Edit existing purchase orders.",
+  },
+  {
+    key: "deletePurchaseOrder",
+    label: "Delete Purchase Orders",
+    description: "Delete existing purchase orders.",
+  },
+  {
+    key: "importPurchaseOrders",
+    label: "Bulk Import Purchase Orders",
+    description: "Import purchase orders from CSV/Excel.",
+  },
+  {
+    key: "viewPayments",
+    label: "View Payments",
+    description: "See the payments page and data.",
+  },
+  {
+    key: "createPayment",
+    label: "Create Payments",
+    description: "Create new payment records.",
+  },
+  {
+    key: "editPayment",
+    label: "Edit Payments",
+    description: "Edit existing payments.",
+  },
+  {
+    key: "deletePayment",
+    label: "Delete Payments",
+    description: "Delete existing payments.",
+  },
+  {
+    key: "importPayments",
+    label: "Bulk Import Payments",
+    description: "Import payments from CSV/Excel.",
   },
   {
     key: "uploadFiles",

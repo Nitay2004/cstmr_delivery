@@ -19,11 +19,71 @@ model PickupRequest {
   actualPickupDate                DateTime?
   actualDeliveredDate             DateTime?
   files                           PickupFile[]
+  quotes                          Quote[]
   createdAt                       DateTime      @default(now())
   updatedAt                       DateTime      @updatedAt
 
   @@unique([sourcingDealNo])
   @@index([sourcingDealNo])
+  @@index([stage])
+}
+
+model Quote {
+  id              String            @id @default(cuid())
+  stage           String
+  sourcingDealNo  String
+  pickup          String?
+  quoteNo         String?
+  totalAmount     Float?
+  locationCode    String?
+  pickupRequestId String?
+  pickupRequest   PickupRequest?    @relation(fields: [pickupRequestId], references: [id], onDelete: SetNull)
+  purchaseOrders  PurchaseOrder[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([sourcingDealNo])
+  @@index([quoteNo])
+  @@index([stage])
+}
+
+model PurchaseOrder {
+  id              String            @id @default(cuid())
+  stage           String
+  sourcingDealNo  String
+  pickup          String?
+  quoteNo         String?
+  purchaseOrderNo String?
+  locationCode    String?
+  quoteId         String?
+  quote           Quote?            @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  payments        Payment[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([sourcingDealNo])
+  @@index([quoteNo])
+  @@index([purchaseOrderNo])
+  @@index([stage])
+}
+
+model Payment {
+  id                 String            @id @default(cuid())
+  stage              String
+  sourcingDealNo     String
+  pickup             String?
+  purchaseOrderNo    String?
+  payment            String?
+  totalInvoiceAmount Float?
+  totalPaymentDone   Float?
+  balanceAmount      Float?
+  purchaseOrderId    String?
+  purchaseOrder      PurchaseOrder?    @relation(fields: [purchaseOrderId], references: [id], onDelete: SetNull)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([sourcingDealNo])
+  @@index([purchaseOrderNo])
   @@index([stage])
 }
 
