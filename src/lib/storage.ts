@@ -7,11 +7,11 @@ export const STORAGE_BUCKET =
 
 function getClient(): SupabaseClient {
   if (_client) return _client;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_ANON_KEY;
   if (!url || !key) {
     throw new Error(
-      "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your environment."
+      "Supabase is not configured. Add SUPABASE_URL and SUPABASE_ANON_KEY to your environment."
     );
   }
   _client = createClient(url, key, { auth: { persistSession: false } });
