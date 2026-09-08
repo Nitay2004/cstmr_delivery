@@ -8,3 +8,8 @@ services:
     environment:
       DATABASE_URL: postgresql://cstmr:${POSTGRES_PASSWORD}@10.199.206.112:5432/cstmr_portal
       JWT_SECRET: ${JWT_SECRET}
+    volumes:
+      - portal-uploads:/app/public/uploads
+
+volumes:
+  portal-uploads:
