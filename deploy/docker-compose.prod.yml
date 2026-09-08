@@ -1,6 +1,8 @@
 services:
   app:
-    build: .
+    build:
+      context: ..
+      dockerfile: Dockerfile
     restart: unless-stopped
     container_name: cstmr-portal-app
     ports:
