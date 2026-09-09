@@ -3,6 +3,7 @@
 import { FileText } from "lucide-react";
 import { ModuleTable } from "@/components/module-table";
 import { ModuleBulkUpload } from "@/components/module-bulk-upload";
+import { CertificateStatCards, CERTIFICATE_STAGES } from "@/components/certificate-stat-cards";
 import { useUser, can } from "@/components/user-provider";
 import type { TableColumn, FormField, ModuleRow } from "@/lib/module-config";
 import type { AttachmentFile } from "@/components/attachment-section";
@@ -53,7 +54,7 @@ const formFields: FormField[] = [
     key: "status",
     label: "Status",
     required: true,
-    placeholder: "e.g. Pending, Received",
+    options: [...CERTIFICATE_STAGES],
   },
   {
     key: "sourcingDealNo",
@@ -65,8 +66,8 @@ const formFields: FormField[] = [
 ];
 
 const SAMPLE_CSV = `Status,Sourcing Deal No.,Pickup
-Pending,SD-1001,PU-001
-Received,SD-1002,PU-002`;
+Certificate Pending,SD-1001,PU-001
+Certificate Generated,SD-1002,PU-002`;
 
 export default function CertificatesPage() {
   const { user } = useUser();
@@ -93,6 +94,8 @@ export default function CertificatesPage() {
           />
         )}
       </div>
+
+      <CertificateStatCards />
 
       <ModuleTable
         title="Certificates"
