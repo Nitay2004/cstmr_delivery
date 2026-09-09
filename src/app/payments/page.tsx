@@ -2,6 +2,7 @@
 
 import { ModuleTable } from "@/components/module-table";
 import { ModuleBulkUpload } from "@/components/module-bulk-upload";
+import { PaymentStatCards, PAYMENT_STAGES } from "@/components/payment-stat-cards";
 import { useUser, can } from "@/components/user-provider";
 import type { TableColumn, FormField } from "@/lib/module-config";
 
@@ -36,7 +37,7 @@ const formFields: FormField[] = [
     key: "stage",
     label: "Stage",
     required: true,
-    placeholder: "e.g. Partial, Paid, Overdue",
+    options: [...PAYMENT_STAGES],
   },
   {
     key: "sourcingDealNo",
@@ -68,8 +69,8 @@ const formFields: FormField[] = [
 ];
 
 const SAMPLE_CSV = `Stage,Sourcing Deal No.,Pickup,Purchase Order No,Payment,Total Invoice Amount,Total Payment Done,Balance Amount
-Partial,SD-1001,John's Warehouse,PO-1001,NEFT-8891,125000,70000,55000
-Paid,SD-1002,ABC Logistics,PO-1002,NEFT-8892,98000,98000,0`;
+Payment Created,SD-1001,John's Warehouse,PO-1001,NEFT-8891,125000,70000,55000
+Payment Approved,SD-1002,ABC Logistics,PO-1002,NEFT-8892,98000,98000,0`;
 
 export default function PaymentsPage() {
   const { user } = useUser();
@@ -96,6 +97,8 @@ export default function PaymentsPage() {
           />
         )}
       </div>
+
+      <PaymentStatCards />
 
       <ModuleTable
         title="Payments"
