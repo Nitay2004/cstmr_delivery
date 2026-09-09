@@ -2,12 +2,12 @@
 
 import { ModuleTable } from "@/components/module-table";
 import { ModuleBulkUpload } from "@/components/module-bulk-upload";
+import { ConsolidatedStatCards } from "@/components/consolidated-stat-cards";
 import { useUser, can } from "@/components/user-provider";
 import type { TableColumn, FormField } from "@/lib/module-config";
 
 const columns: TableColumn[] = [
   { key: "category", label: "Category" },
-  { key: "subCategory", label: "Sub Category" },
   { key: "qty", label: "Qty", align: "right" },
   { key: "amount", label: "Amount", align: "right", format: "amount" },
 ];
@@ -19,14 +19,13 @@ const formFields: FormField[] = [
     required: true,
     placeholder: "e.g. Laptops",
   },
-  { key: "subCategory", label: "Sub Category", placeholder: "e.g. Dell" },
   { key: "qty", label: "Qty", inputType: "number", placeholder: "0" },
   { key: "amount", label: "Amount", inputType: "number", placeholder: "0.00" },
 ];
 
-const SAMPLE_CSV = `Category,Sub Category,Qty,Amount
-Laptops,Dell,10,250000
-Desktops,HP,5,120000`;
+const SAMPLE_CSV = `Category,Qty,Amount
+Laptops,10,250000
+Desktops,5,120000`;
 
 export default function ConsolidatedPage() {
   const { user } = useUser();
@@ -48,11 +47,13 @@ export default function ConsolidatedPage() {
             title="Bulk Upload Consolidated"
             description="Import consolidated records from a CSV or Excel file."
             requiredColumns="Category"
-            optionalColumns="Sub Category, Qty, Amount"
+            optionalColumns="Qty, Amount"
             sampleCsv={SAMPLE_CSV}
           />
         )}
       </div>
+
+      <ConsolidatedStatCards />
 
       <ModuleTable
         title="Consolidated"
@@ -61,7 +62,7 @@ export default function ConsolidatedPage() {
         apiPath="/api/consolidated"
         columns={columns}
         formFields={formFields}
-        searchFields={["category", "subCategory"]}
+        searchFields={["category"]}
         permissions={{
           view: "viewConsolidated",
           create: "createConsolidated",

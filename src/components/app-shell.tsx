@@ -5,10 +5,12 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { AuthHeader } from "@/components/auth-header";
+import { useUser } from "@/components/user-provider";
 import type { ReactNode } from "react";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const { user } = useUser();
   const isPublic =
     pathname === "/login" || pathname === "/register";
 
@@ -23,6 +25,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
+          <span className="text-xl text-muted-foreground">
+            Welcome back,{" "}
+            <span className="font-semibold text-foreground">
+              {user?.name ?? "there"}
+            </span>
+          </span>
           <div className="ml-auto">
             <AuthHeader />
           </div>

@@ -64,12 +64,19 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/pickup-request" />}>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <PackageOpen className="size-4" />
+              <div className="flex aspect-square size-11 shrink-0 items-center justify-center overflow-hidden rounded-md">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/logo.jpg"
+                  alt="Deshwal-Optum"
+                  className="size-full object-cover"
+                />
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
                 <span className="font-semibold text-foreground">Customer Portal</span>
-                <span className="text-xs text-muted-foreground">Welcome</span>
+                <span className="text-xs font-medium text-muted-foreground">
+                  Deshwal-Optum
+                </span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>

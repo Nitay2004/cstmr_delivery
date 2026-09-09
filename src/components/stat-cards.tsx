@@ -115,7 +115,7 @@ export function StatCards() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
       {CARD_DEFS.map((def) => {
         const Icon = def.icon;
         const count = summary.stages[normalizeStage(def.stage)] ?? 0;
