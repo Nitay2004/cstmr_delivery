@@ -17,4 +17,5 @@ export interface FormField {
   required?: boolean;
   placeholder?: string;
   inputType?: "text" | "number" | "date";
+  options?: string[];
 }

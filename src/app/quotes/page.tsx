@@ -2,6 +2,7 @@
 
 import { ModuleTable } from "@/components/module-table";
 import { ModuleBulkUpload } from "@/components/module-bulk-upload";
+import { QuoteStatCards, QUOTE_STAGES } from "@/components/quote-stat-cards";
 import { useUser, can } from "@/components/user-provider";
 import type { TableColumn, FormField } from "@/lib/module-config";
 
@@ -20,7 +21,7 @@ const formFields: FormField[] = [
     key: "stage",
     label: "Quote Stage",
     required: true,
-    placeholder: "e.g. Draft, Submitted, Approved",
+    options: [...QUOTE_STAGES],
   },
   {
     key: "sourcingDealNo",
@@ -40,8 +41,8 @@ const formFields: FormField[] = [
 ];
 
 const SAMPLE_CSV = `Quote Stage,Sourcing Deal No.,Pickup Number,Quote No.,Total Amount,Location Code
-Submitted,SD-1001,PU-001,QU-0001,125000,MBI
-Approved,SD-1002,PU-002,QU-0002,98000,DLI`;
+Pending for Allocation,SD-1001,PU-001,QU-0001,125000,MBI
+Quote Approved,SD-1002,PU-002,QU-0002,98000,DLI`;
 
 export default function QuotesPage() {
   const { user } = useUser();
@@ -68,6 +69,8 @@ export default function QuotesPage() {
           />
         )}
       </div>
+
+      <QuoteStatCards />
 
       <ModuleTable
         title="Quotes"

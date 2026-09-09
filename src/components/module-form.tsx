@@ -226,12 +226,27 @@ export function ModuleForm({
                 {f.label}
                 {f.required ? " *" : ""}
               </label>
-              <Input
-                type={f.inputType === "number" ? "number" : f.inputType === "date" ? "date" : "text"}
-                value={values[f.key] ?? ""}
-                onChange={(e) => set(f.key, e.target.value)}
-                placeholder={f.placeholder}
-              />
+              {f.options ? (
+                <select
+                  value={values[f.key] ?? ""}
+                  onChange={(e) => set(f.key, e.target.value)}
+                  className="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80"
+                >
+                  <option value="">Select {f.label.toLowerCase()}...</option>
+                  {f.options.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <Input
+                  type={f.inputType === "number" ? "number" : f.inputType === "date" ? "date" : "text"}
+                  value={values[f.key] ?? ""}
+                  onChange={(e) => set(f.key, e.target.value)}
+                  placeholder={f.placeholder}
+                />
+              )}
             </div>
           ))}
 
