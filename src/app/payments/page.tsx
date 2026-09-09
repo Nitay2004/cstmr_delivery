@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ModuleTable } from "@/components/module-table";
 import { ModuleBulkUpload } from "@/components/module-bulk-upload";
 import { PaymentStatCards, PAYMENT_STAGES } from "@/components/payment-stat-cards";
@@ -74,6 +75,7 @@ Payment Approved,SD-1002,ABC Logistics,PO-1002,NEFT-8892,98000,98000,0`;
 
 export default function PaymentsPage() {
   const { user } = useUser();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   return (
     <div className="flex flex-1 flex-col gap-6">
@@ -98,7 +100,7 @@ export default function PaymentsPage() {
         )}
       </div>
 
-      <PaymentStatCards />
+      <PaymentStatCards key={refreshKey} />
 
       <ModuleTable
         title="Payments"
@@ -120,6 +122,7 @@ export default function PaymentsPage() {
           del: "deletePayment",
         }}
         attach={{ module: "payment", title: "Payment" }}
+        onDataChange={() => setRefreshKey((k) => k + 1)}
       />
     </div>
   );

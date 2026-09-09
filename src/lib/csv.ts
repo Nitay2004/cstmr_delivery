@@ -188,9 +188,13 @@ export type DataWipingCsvData = {
   laptop?: number;
   desktop?: number;
   total?: number;
+  laptopSsdHddReceived?: number;
   laptopWiped?: number;
-  desktopWiped?: number;
+  laptopShreddingDone?: number;
   laptopNotWiped?: number;
+  desktopSsdHddReceived?: number;
+  desktopWiped?: number;
+  desktopShreddingDone?: number;
   desktopNotWiped?: number;
 };
 
@@ -204,10 +208,24 @@ export function rowToDataWipingData(row: CsvRow): DataWipingCsvData {
     laptop: toInt(n["laptop"] ?? ""),
     desktop: toInt(n["desktop"] ?? ""),
     total: toInt(n["total"] ?? ""),
-    laptopWiped: toInt(n["laptopwiped"] ?? ""),
-    desktopWiped: toInt(n["desktopwiped"] ?? ""),
-    laptopNotWiped: toInt(n["laptopnotwiped"] ?? ""),
-    desktopNotWiped: toInt(n["desktopnotwiped"] ?? ""),
+    laptopSsdHddReceived: toInt(
+      n["laptopssdhddreceived"] ?? n["laptopssdreceived"] ?? ""
+    ),
+    laptopWiped: toInt(n["laptopdatasanitized"] ?? n["laptopwiped"] ?? ""),
+    laptopShreddingDone: toInt(n["laptopshreddingdone"] ?? ""),
+    laptopNotWiped: toInt(
+      n["laptopssdnotreceived"] ?? n["laptopnotwiped"] ?? ""
+    ),
+    desktopSsdHddReceived: toInt(
+      n["desktopssdhddreceived"] ?? n["desktopssdreceived"] ?? ""
+    ),
+    desktopWiped: toInt(
+      n["desktopdatasanitized"] ?? n["desktopwiped"] ?? ""
+    ),
+    desktopShreddingDone: toInt(n["desktopshreddingdone"] ?? ""),
+    desktopNotWiped: toInt(
+      n["desktopssdnotreceived"] ?? n["desktopnotwiped"] ?? ""
+    ),
   };
 }
 

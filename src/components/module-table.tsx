@@ -61,6 +61,7 @@ interface Props {
     title: string;
     categories?: { key: string; label: string }[];
   };
+  onDataChange?: () => void;
 }
 
 const stageStyles: Record<string, string> = {
@@ -75,6 +76,7 @@ const stageStyles: Record<string, string> = {
   "second approval pending": "bg-orange-100/80 text-orange-700 border-orange-200 dark:bg-orange-500/20 dark:text-orange-400 dark:border-orange-500/30",
   "payment approved": "bg-green-100/80 text-green-700 border-green-200 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30",
   "payment pending": "bg-rose-100/80 text-rose-700 border-rose-200 dark:bg-rose-500/20 dark:text-rose-400 dark:border-rose-500/30",
+  "payment transferred": "bg-green-100/80 text-green-700 border-green-200 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30",
   "data wiping created": "bg-sky-100/80 text-sky-700 border-sky-200 dark:bg-sky-500/20 dark:text-sky-400 dark:border-sky-500/30",
   "under process": "bg-amber-100/80 text-amber-700 border-amber-200 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30",
   "in progress": "bg-amber-100/80 text-amber-700 border-amber-200 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30",
@@ -83,6 +85,7 @@ const stageStyles: Record<string, string> = {
   "material received": "bg-sky-100/80 text-sky-700 border-sky-200 dark:bg-sky-500/20 dark:text-sky-400 dark:border-sky-500/30",
   "grn done": "bg-primary/10 text-primary border-primary/20 dark:bg-primary/20 dark:text-primary dark:border-primary/30",
   separation: "bg-indigo-100/80 text-indigo-700 border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-400 dark:border-indigo-500/30",
+  segregation: "bg-indigo-100/80 text-indigo-700 border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-400 dark:border-indigo-500/30",
   tagging: "bg-violet-100/80 text-violet-700 border-violet-200 dark:bg-violet-500/20 dark:text-violet-400 dark:border-violet-500/30",
   cleaning: "bg-cyan-100/80 text-cyan-700 border-cyan-200 dark:bg-cyan-500/20 dark:text-cyan-400 dark:border-cyan-500/30",
   "sticker removal": "bg-fuchsia-100/80 text-fuchsia-700 border-fuchsia-200 dark:bg-fuchsia-500/20 dark:text-fuchsia-400 dark:border-fuchsia-500/30",
@@ -144,6 +147,7 @@ export function ModuleTable({
   searchFields = [],
   permissions,
   attach,
+  onDataChange,
 }: Props) {
   const { user } = useUser();
   const canCreate = can(user, permissions.create);
@@ -227,6 +231,7 @@ export function ModuleTable({
 
   const handleSaved = () => {
     load();
+    onDataChange?.();
   };
 
   const handleDelete = async () => {
@@ -241,6 +246,7 @@ export function ModuleTable({
       if (!res.ok) throw new Error(data.error ?? "Failed to delete");
       setDeleteId(null);
       load();
+      onDataChange?.();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Failed to delete");
       setDeleteId(null);

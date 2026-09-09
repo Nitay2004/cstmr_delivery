@@ -18,6 +18,18 @@ model PickupRequest {
   location                        String?
   actualPickupDate                DateTime?
   actualDeliveredDate             DateTime?
+  accessPoint                     Int?
+  desktop                         Int?
+  ipTelephonyEpbxDevices          Int?
+  laptop                          Int?
+  mixEWaste                       Int?
+  mixPeripherals                  Int?
+  mobile                          Int?
+  router                          Int?
+  server                          Int?
+  switch                          Int?
+  tablet                          Int?
+  tftMonitor                      Int?
   files                           PickupFile[]
   quotes                          Quote[]
   dataWipings                     DataWiping[]
@@ -158,9 +170,13 @@ model DataWiping {
   laptop            Int?
   desktop           Int?
   total             Int?
+  laptopSsdHddReceived Int?
   laptopWiped       Int?
-  desktopWiped      Int?
+  laptopShreddingDone Int?
   laptopNotWiped    Int?
+  desktopSsdHddReceived Int?
+  desktopWiped      Int?
+  desktopShreddingDone Int?
   desktopNotWiped   Int?
   pickupRequestId   String?
   pickupRequest     PickupRequest?    @relation(fields: [pickupRequestId], references: [id], onDelete: SetNull)

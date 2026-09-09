@@ -68,9 +68,17 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if ("laptop" in body) data.laptop = int(body.laptop);
   if ("desktop" in body) data.desktop = int(body.desktop);
   if ("total" in body) data.total = int(body.total);
+  if ("laptopSsdHddReceived" in body)
+    data.laptopSsdHddReceived = int(body.laptopSsdHddReceived);
   if ("laptopWiped" in body) data.laptopWiped = int(body.laptopWiped);
-  if ("desktopWiped" in body) data.desktopWiped = int(body.desktopWiped);
+  if ("laptopShreddingDone" in body)
+    data.laptopShreddingDone = int(body.laptopShreddingDone);
   if ("laptopNotWiped" in body) data.laptopNotWiped = int(body.laptopNotWiped);
+  if ("desktopSsdHddReceived" in body)
+    data.desktopSsdHddReceived = int(body.desktopSsdHddReceived);
+  if ("desktopWiped" in body) data.desktopWiped = int(body.desktopWiped);
+  if ("desktopShreddingDone" in body)
+    data.desktopShreddingDone = int(body.desktopShreddingDone);
   if ("desktopNotWiped" in body)
     data.desktopNotWiped = int(body.desktopNotWiped);
 

@@ -1,0 +1,13 @@
+-- AlterTable
+ALTER TABLE "PickupRequest" ADD COLUMN "accessPoint" INTEGER,
+ADD COLUMN "desktop" INTEGER,
+ADD COLUMN "ipTelephonyEpbxDevices" INTEGER,
+ADD COLUMN "laptop" INTEGER,
+ADD COLUMN "mixEWaste" INTEGER,
+ADD COLUMN "mixPeripherals" INTEGER,
+ADD COLUMN "mobile" INTEGER,
+ADD COLUMN "router" INTEGER,
+ADD COLUMN "server" INTEGER,
+ADD COLUMN "switch" INTEGER,
+ADD COLUMN "tablet" INTEGER,
+ADD COLUMN "tftMonitor" INTEGER;

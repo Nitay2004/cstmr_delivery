@@ -24,10 +24,10 @@ import {
 export const GRN_STAGES = [
   "Material Received",
   "GRN Done",
-  "Separation",
+  "Segregation",
   "Tagging",
-  "Cleaning",
   "Sticker Removal",
+  "Cleaning",
   "IQC",
   "Data Wiping",
   "Completed",
@@ -56,8 +56,8 @@ const CARD_DEFS: CardDef[] = [
     iconClass: "bg-primary/10 text-primary",
   },
   {
-    stage: "Separation",
-    match: /\bseparation\b|\bseperation\b/,
+    stage: "Segregation",
+    match: /\bsegregation\b|\bseparation\b|\bseperation\b/,
     icon: Split,
     iconClass: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
   },
@@ -68,16 +68,16 @@ const CARD_DEFS: CardDef[] = [
     iconClass: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
   },
   {
-    stage: "Cleaning",
-    match: /\bcleaning\b|\bcleaned\b|\bclean\b/,
-    icon: Sparkles,
-    iconClass: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400",
-  },
-  {
     stage: "Sticker Removal",
     match: /sticker\s*removal|sticker\s*removed|sticker.?removal/,
     icon: Sticker,
     iconClass: "bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400",
+  },
+  {
+    stage: "Cleaning",
+    match: /\bcleaning\b|\bcleaned\b|\bclean\b/,
+    icon: Sparkles,
+    iconClass: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400",
   },
   {
     stage: "IQC",

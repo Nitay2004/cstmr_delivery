@@ -60,17 +60,17 @@ export default function GrnPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl text-foreground">
-            GRN
+            Change of Custody
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Track goods-receipt notes, invoices and material received dates.
+            Track change-of-custody records, invoices and material received dates.
           </p>
         </div>
         {can(user, "importGrn") && (
           <ModuleBulkUpload
             apiPath="/api/grns/import"
-            title="Bulk Upload GRN"
-            description="Import GRN records from a CSV or Excel file."
+            title="Bulk Upload Change of Custody"
+            description="Import change-of-custody records from a CSV or Excel file."
             requiredColumns="Stage, Sourcing Deal No."
             optionalColumns="Pickup, GRN Details, Invoice Number, Invoice Date, Material Received Date"
             sampleCsv={SAMPLE_CSV}
@@ -81,8 +81,8 @@ export default function GrnPage() {
       <GrnStatCards />
 
       <ModuleTable
-        title="GRN"
-        singular="GRN"
+        title="Change of Custody"
+        singular="Change of Custody"
         apiPath="/api/grns"
         columns={columns}
         formFields={formFields}
@@ -99,7 +99,7 @@ export default function GrnPage() {
           edit: "editGrn",
           del: "deleteGrn",
         }}
-        attach={{ module: "grn", title: "GRN" }}
+        attach={{ module: "grn", title: "Change of Custody" }}
       />
     </div>
   );

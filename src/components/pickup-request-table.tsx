@@ -42,6 +42,7 @@ import {
   type PickupRequestFormValues,
 } from "@/components/pickup-request-form";
 import { useUser, can } from "@/components/user-provider";
+import { PICKUP_DEVICE_FIELDS } from "@/lib/pickup-devices";
 
 interface PickupFile {
   id: string;
@@ -59,6 +60,18 @@ interface PickupRequest {
   location: string | null;
   actualPickupDate: string | null;
   actualDeliveredDate: string | null;
+  accessPoint: number | null;
+  desktop: number | null;
+  ipTelephonyEpbxDevices: number | null;
+  laptop: number | null;
+  mixEWaste: number | null;
+  mixPeripherals: number | null;
+  mobile: number | null;
+  router: number | null;
+  server: number | null;
+  switch: number | null;
+  tablet: number | null;
+  tftMonitor: number | null;
   createdAt: string;
   files: PickupFile[];
 }
@@ -104,7 +117,8 @@ export function PickupRequestTable() {
   const canCreate = can(user, "createPickupRequest");
   const canEdit = can(user, "editPickupRequest");
   const canDelete = can(user, "deletePickupRequest");
-  const colCount = 7 + (canEdit || canDelete ? 1 : 0);
+  const colCount =
+    7 + PICKUP_DEVICE_FIELDS.length + (canEdit || canDelete ? 1 : 0);
   const [requests, setRequests] = useState<PickupRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -258,13 +272,18 @@ export function PickupRequestTable() {
         </div>
       </CardHeader>
       
-      <Table>
+<Table className="min-w-max">
         <TableHeader className="bg-muted/30">
           <TableRow>
-            <TableHead>Stage</TableHead>
+<TableHead>Stage</TableHead>
             <TableHead>Sourcing Deal No.</TableHead>
             <TableHead>Pickup</TableHead>
             <TableHead>Location</TableHead>
+            {PICKUP_DEVICE_FIELDS.map((field) => (
+              <TableHead key={field.key} className="text-right whitespace-nowrap">
+                {field.label}
+              </TableHead>
+            ))}
             <TableHead>Actual Pickup Date</TableHead>
             <TableHead>Actual Delivered Date</TableHead>
 <TableHead className="text-right">Attachments</TableHead>
@@ -318,8 +337,13 @@ export function PickupRequestTable() {
                 <TableCell className="font-medium text-foreground">
                   {r.sourcingDealNo}
                 </TableCell>
-                <TableCell>{r.pickup ?? "—"}</TableCell>
+<TableCell>{r.pickup ?? "—"}</TableCell>
                 <TableCell>{r.location ?? "—"}</TableCell>
+                {PICKUP_DEVICE_FIELDS.map((field) => (
+                  <TableCell key={field.key} className="text-right tabular-nums">
+                    {r[field.key] ?? "—"}
+                  </TableCell>
+                ))}
                 <TableCell>{formatDate(r.actualPickupDate)}</TableCell>
                 <TableCell>{formatDate(r.actualDeliveredDate)}</TableCell>
                 <TableCell className="text-right">

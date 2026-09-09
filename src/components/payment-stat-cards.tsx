@@ -22,7 +22,7 @@ export const PAYMENT_STAGES = [
   "First Approval Pending",
   "Second Approval Pending",
   "Payment Approved",
-  "Payment Pending",
+  "Payment Transferred",
 ] as const;
 
 export type PaymentStage = (typeof PAYMENT_STAGES)[number];
@@ -60,8 +60,8 @@ const CARD_DEFS: CardDef[] = [
     iconClass: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   },
   {
-    stage: "Payment Pending",
-    match: /payment\s*pending|\bpending\s*payment\b/,
+    stage: "Payment Transferred",
+    match: /payment\s*(pending|transferred)|pending\s*payment\b/,
     icon: Hourglass,
     iconClass: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
   },
