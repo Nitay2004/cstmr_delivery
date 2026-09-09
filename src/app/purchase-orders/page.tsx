@@ -2,6 +2,7 @@
 
 import { ModuleTable } from "@/components/module-table";
 import { ModuleBulkUpload } from "@/components/module-bulk-upload";
+import { PurchaseOrderStatCards, PO_STAGES } from "@/components/po-stat-cards";
 import { useUser, can } from "@/components/user-provider";
 import type { TableColumn, FormField } from "@/lib/module-config";
 
@@ -20,7 +21,7 @@ const formFields: FormField[] = [
     key: "stage",
     label: "PO Stage",
     required: true,
-    placeholder: "e.g. Draft, Issued, Confirmed",
+    options: [...PO_STAGES],
   },
   {
     key: "sourcingDealNo",
@@ -35,8 +36,8 @@ const formFields: FormField[] = [
 ];
 
 const SAMPLE_CSV = `PO Stage,Sourcing Deal No.,Pickup,Quote,Purchase Order,Location Code
-Issued,SD-1001,John's Warehouse,QU-0001,PO-1001,MBI
-Confirmed,SD-1002,ABC Logistics,QU-0002,PO-1002,DLI`;
+Pending for Approval,SD-1001,John's Warehouse,QU-0001,PO-1001,MBI
+Purchase Order Approved,SD-1002,ABC Logistics,QU-0002,PO-1002,DLI`;
 
 export default function PurchaseOrdersPage() {
   const { user } = useUser();
@@ -63,6 +64,8 @@ export default function PurchaseOrdersPage() {
           />
         )}
       </div>
+
+      <PurchaseOrderStatCards />
 
       <ModuleTable
         title="Purchase Orders"
