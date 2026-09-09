@@ -94,8 +94,8 @@ export default function DataWipingPage() {
             apiPath="/api/data-wiping/import"
             title="Bulk Upload Data Wiping"
             description="Import data wiping records from a CSV or Excel file."
-            requiredColumns="Status, Sourcing Deal No."
-            optionalColumns="Pickup, Data Wiping Id, Laptop, Desktop, Total, Laptop Wiped, Desktop Wiped, Laptop Not Wiped, Desktop Not Wiped"
+            requiredColumns="Status, Sourcing Deal No., Pickup, Data Wiping Id"
+            optionalColumns="Laptop, Desktop, Total, Laptop Wiped, Desktop Wiped, Laptop Not Wiped, Desktop Not Wiped"
             sampleCsv={SAMPLE_CSV}
           />
         )}

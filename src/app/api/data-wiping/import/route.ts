@@ -53,6 +53,15 @@ export async function POST(request: NextRequest) {
   if (!normalizedHeaders.includes("sourcingdealno")) {
     missing.push("sourcingdealno");
   }
+  if (
+    !normalizedHeaders.includes("pickup") &&
+    !normalizedHeaders.includes("pickupnumber")
+  ) {
+    missing.push("pickup");
+  }
+  if (!normalizedHeaders.includes("datawipingid")) {
+    missing.push("datawipingid");
+  }
 
   if (missing.length > 0) {
     return NextResponse.json(
@@ -71,10 +80,10 @@ export async function POST(request: NextRequest) {
 
   rows.forEach((row, index) => {
     const data = rowToDataWipingData(row);
-    if (!data.status || !data.sourcingDealNo) {
+    if (!data.status || !data.sourcingDealNo || !data.pickup || !data.dataWipingId) {
       skipped.push({
         row: index + 2,
-        reason: "Missing status or sourcingDealNo",
+        reason: "Missing status, sourcingDealNo, pickup or dataWipingId",
       });
       return;
     }
