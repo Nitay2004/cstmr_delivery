@@ -7,8 +7,10 @@ export const STORAGE_BUCKET =
 
 function getClient(): SupabaseClient {
   if (_client) return _client;
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY;
+  const url =
+    process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key =
+    process.env.SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) {
     throw new Error(
       "Supabase is not configured. Add SUPABASE_URL and SUPABASE_ANON_KEY to your environment."
@@ -36,6 +38,22 @@ export function buildStoragePath(folder: string, ext: string): string {
 export function getPublicUrl(path: string): string {
   const { data } = getClient().storage.from(STORAGE_BUCKET).getPublicUrl(path);
   return data.publicUrl;
+}
+
+export function toObjectKey(storagePath: string): string {
+  if (!storagePath) return storagePath;
+  const publicMarker = "/object/public/";
+  const signMarker = "/object/sign/";
+  const publicIdx = storagePath.lastIndexOf(publicMarker);
+  const signIdx = storagePath.lastIndexOf(signMarker);
+  let key: string;
+  if (publicIdx !== -1) key = storagePath.slice(publicIdx + publicMarker.length);
+  else if (signIdx !== -1) key = storagePath.slice(signIdx + signMarker.length);
+  else key = storagePath;
+
+  const bucketPrefix = `${STORAGE_BUCKET}/`;
+  if (key.startsWith(bucketPrefix)) key = key.slice(bucketPrefix.length);
+  return key.split("?")[0];
 }
 
 export async function uploadFile(
@@ -68,9 +86,6 @@ export async function uploadFile(
 
 export async function deleteFileByPath(storagePath: string): Promise<void> {
   if (!storagePath) return;
-  const marker = "/object/public/";
-  const idx = storagePath.lastIndexOf(marker);
-  const objectKey =
-    idx !== -1 ? storagePath.slice(idx + marker.length) : storagePath;
+  const objectKey = toObjectKey(storagePath);
   await getClient().storage.from(STORAGE_BUCKET).remove([objectKey]);
 }

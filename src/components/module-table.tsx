@@ -244,11 +244,25 @@ export function ModuleTable({
   const renderCell = (col: TableColumn, r: ModuleRow) => {
     if (col.render) return col.render(r);
     if (col.key === "download") {
+      const files = Array.isArray(r.files)
+        ? (r.files as { id: string; fileName: string }[])
+        : [];
+      if (files.length === 0 || !attach) {
+        return <span className="text-muted-foreground/50">—</span>;
+      }
       return (
-        <span className="inline-flex items-center justify-end gap-1 text-xs text-muted-foreground">
-          <Download className="size-3" />
-          Download
-        </span>
+        <div className="flex flex-col items-end gap-1">
+          {files.map((f) => (
+            <a
+              key={f.id}
+              href={`/api/attachments/file?id=${f.id}&module=${attach.module}&download=1`}
+              className="inline-flex max-w-[180px] items-center gap-1 truncate text-xs text-primary hover:underline"
+            >
+              <Download className="size-3 shrink-0" />
+              <span className="truncate">{f.fileName}</span>
+            </a>
+          ))}
+        </div>
       );
     }
     const v = r[col.key];

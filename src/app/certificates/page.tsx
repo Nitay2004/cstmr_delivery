@@ -22,7 +22,7 @@ function certCell(r: ModuleRow, category: string) {
       {matching.map((f) => (
         <a
           key={f.id}
-          href={f.storagePath}
+          href={`/api/attachments/file?module=certificate&id=${f.id}`}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex max-w-[180px] items-center gap-1 truncate text-sm text-primary hover:underline"

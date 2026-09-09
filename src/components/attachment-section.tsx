@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   AlertCircle,
+  Download,
   FileText,
   Image as ImageIcon,
   Loader2,
@@ -147,7 +148,7 @@ export function AttachmentSection({
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-foreground">
                   <a
-                    href={f.storagePath}
+                    href={`/api/attachments/file?module=${module}&id=${f.id}`}
                     target="_blank"
                     rel="noreferrer"
                     className="hover:underline"
@@ -159,6 +160,18 @@ export function AttachmentSection({
                   {formatSize(f.fileSize)}
                 </p>
               </div>
+              <a
+                href={`/api/attachments/file?module=${module}&id=${f.id}&download=1`}
+                aria-label={`Download ${f.fileName}`}
+              >
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Download className="size-4" />
+                </Button>
+              </a>
               <Button
                 variant="ghost"
                 size="icon-sm"
