@@ -2,6 +2,7 @@
 
 import { ModuleTable } from "@/components/module-table";
 import { ModuleBulkUpload } from "@/components/module-bulk-upload";
+import { DataWipingStatCards, DATA_WIPING_STAGES } from "@/components/data-wiping-stat-cards";
 import { useUser, can } from "@/components/user-provider";
 import type { TableColumn, FormField, ModuleRow } from "@/lib/module-config";
 
@@ -32,7 +33,7 @@ const formFields: FormField[] = [
     key: "status",
     label: "Status",
     required: true,
-    placeholder: "e.g. In Progress, Completed",
+    options: [...DATA_WIPING_STAGES],
   },
   {
     key: "sourcingDealNo",
@@ -72,7 +73,7 @@ const formFields: FormField[] = [
 ];
 
 const SAMPLE_CSV = `Status,Sourcing Deal No.,Pickup,Data Wiping Id,Laptop,Desktop,Total,Laptop Wiped,Desktop Wiped,Laptop Not Wiped,Desktop Not Wiped
-In Progress,SD-1001,PU-001,DW-0001,10,5,15,6,2,4,3
+Under Process,SD-1001,PU-001,DW-0001,10,5,15,6,2,4,3
 Completed,SD-1002,PU-002,DW-0002,20,10,30,20,10,0,0`;
 
 export default function DataWipingPage() {
@@ -100,6 +101,8 @@ export default function DataWipingPage() {
           />
         )}
       </div>
+
+      <DataWipingStatCards />
 
       <ModuleTable
         title="Data Wiping"
