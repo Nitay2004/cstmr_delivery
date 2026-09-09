@@ -16,6 +16,7 @@ import {
   type AttachmentFile,
 } from "@/components/attachment-section";
 import { useUser, can } from "@/components/user-provider";
+import { PICKUP_STAGES } from "@/components/stat-cards";
 
 export interface PickupRequestFormValues {
   id?: string;
@@ -144,11 +145,18 @@ export function PickupRequestForm({
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
           <div className="space-y-1.5">
             <label className="text-sm font-medium">Stage *</label>
-            <Input
+            <select
               value={values.stage}
               onChange={(e) => set("stage", e.target.value)}
-              placeholder="e.g. Picked Up, In Transit, Delivered"
-            />
+              className="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80"
+            >
+              <option value="">Select stage...</option>
+              {PICKUP_STAGES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="space-y-1.5">
