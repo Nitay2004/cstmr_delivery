@@ -34,6 +34,23 @@ interface Props {
   onSaved: () => void;
 }
 
+interface PendingFile {
+  key: string;
+  file: File;
+  category?: string;
+}
+
+function extractId(data: Record<string, unknown>): string | undefined {
+  if (typeof data.id === "string") return data.id;
+  for (const value of Object.values(data)) {
+    if (value && typeof value === "object") {
+      const id = (value as Record<string, unknown>).id;
+      if (typeof id === "string") return id;
+    }
+  }
+  return undefined;
+}
+
 export function ModuleForm({
   open,
   onOpenChange,
@@ -49,6 +66,7 @@ export function ModuleForm({
     const raw = initial?.files;
     return Array.isArray(raw) ? (raw as AttachmentFile[]) : [];
   });
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
   const [values, setValues] = useState<Record<string, string>>(() => {
     const v: Record<string, string> = {};
     for (const f of fields) {
@@ -70,16 +88,10 @@ export function ModuleForm({
     try {
       const res = await fetch(apiPath);
       const data = await res.json();
-      const list = Array.isArray(data.items)
-        ? data.items
-        : Array.isArray(data.rows)
-          ? data.rows
-          : ["quotes", "orders", "payments"]
-              .map((k) => data[k])
-              .find((v) => Array.isArray(v)) ?? [];
-      const row = (list as { id: string; files?: unknown }[]).find(
-        (r) => r.id === initial.id
-      );
+      const list = Object.values(data).find((v) => Array.isArray(v)) as
+        | { id: string; files?: unknown }[]
+        | undefined;
+      const row = (list ?? []).find((r) => r.id === initial.id);
       if (row && Array.isArray(row.files)) {
         setFiles(row.files as AttachmentFile[]);
       }
@@ -90,6 +102,59 @@ export function ModuleForm({
 
   const set = (key: string, value: string) =>
     setValues((v) => ({ ...v, [key]: value }));
+
+  const stageFiles = (filesToStage: File[], category?: string) => {
+    setError(null);
+    setPendingFiles((prev) => [
+      ...prev,
+      ...filesToStage.map((file, i) => ({
+        key: `${category ?? "files"}-${file.name}-${Date.now()}-${i}`,
+        file,
+        category,
+      })),
+    ]);
+  };
+
+  const unstageFile = (key: string) => {
+    setPendingFiles((prev) => prev.filter((p) => p.key !== key));
+  };
+
+  const uploadPending = async (
+    entityId: string,
+    module: string
+  ): Promise<boolean> => {
+    if (pendingFiles.length === 0) return true;
+    const categories = [
+      ...new Set(pendingFiles.map((p) => p.category ?? "")),
+    ];
+    try {
+      for (const cat of categories) {
+        const group = pendingFiles.filter(
+          (p) => (p.category ?? "") === cat
+        );
+        const formData = new FormData();
+        formData.append("module", module);
+        formData.append("entityId", entityId);
+        if (cat) formData.append("category", cat);
+        group.forEach((p) => formData.append("files", p.file));
+        const res = await fetch("/api/attachments", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? "Upload failed");
+      }
+      setPendingFiles([]);
+      return true;
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? `Record saved, but file upload failed: ${err.message}`
+          : "Record saved, but file upload failed"
+      );
+      return false;
+    }
+  };
 
   const handleSubmit = async () => {
     for (const f of fields) {
@@ -121,10 +186,20 @@ export function ModuleForm({
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Failed to save");
-      } else {
-        onSaved();
-        onOpenChange(false);
+        return;
       }
+
+      const entityId = mode === "create" ? extractId(data) : initial?.id;
+      if (attach && pendingFiles.length > 0 && typeof entityId === "string") {
+        const uploaded = await uploadPending(entityId, attach.module);
+        if (!uploaded) {
+          onSaved();
+          return;
+        }
+      }
+
+      onSaved();
+      onOpenChange(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
     } finally {
@@ -159,26 +234,35 @@ export function ModuleForm({
               />
             </div>
           ))}
-          {mode === "edit" && attach && typeof initial?.id === "string" && (
+
+          {attach && (
             attach.categories && attach.categories.length > 0 ? (
               attach.categories.map((cat) => (
                 <AttachmentSection
                   key={cat.key}
                   title={`${attach.title} — ${cat.label}`}
                   module={attach.module}
-                  entityId={String(initial.id)}
+                  entityId={mode === "edit" ? String(initial?.id) : undefined}
                   files={files}
                   category={cat.key}
                   onChanged={refreshFiles}
+                  stagedFiles={pendingFiles.filter(
+                    (p) => p.category === cat.key
+                  )}
+                  onStageFiles={(f) => stageFiles(f, cat.key)}
+                  onUnstageFile={unstageFile}
                 />
               ))
             ) : (
               <AttachmentSection
                 title={attach.title}
                 module={attach.module}
-                entityId={String(initial.id)}
+                entityId={mode === "edit" ? String(initial?.id) : undefined}
                 files={files}
                 onChanged={refreshFiles}
+                stagedFiles={pendingFiles.filter((p) => !p.category)}
+                onStageFiles={(f) => stageFiles(f, undefined)}
+                onUnstageFile={unstageFile}
               />
             )
           )}

@@ -11,6 +11,7 @@ import {
   Paperclip,
   Trash2,
   Upload,
+  X,
 } from "lucide-react";
 
 export interface AttachmentFile {
@@ -19,6 +20,12 @@ export interface AttachmentFile {
   fileSize: number;
   mimeType: string;
   storagePath: string;
+  category?: string;
+}
+
+export interface StagedFile {
+  key: string;
+  file: File;
   category?: string;
 }
 
@@ -34,11 +41,14 @@ export type AttachmentModule =
 interface Props {
   title: string;
   module: AttachmentModule;
-  entityId: string;
+  entityId?: string;
   files: AttachmentFile[];
   onChanged: () => void;
   category?: string;
   uploadLabel?: string;
+  stagedFiles?: StagedFile[];
+  onStageFiles?: (files: File[]) => void;
+  onUnstageFile?: (key: string) => void;
 }
 
 function formatSize(bytes: number) {
@@ -63,6 +73,9 @@ export function AttachmentSection({
   onChanged,
   category,
   uploadLabel,
+  stagedFiles = [],
+  onStageFiles,
+  onUnstageFile,
 }: Props) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +83,9 @@ export function AttachmentSection({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const shown = category ? files.filter((f) => f.category === category) : files;
+  const staged = category
+    ? stagedFiles.filter((s) => s.category === category)
+    : stagedFiles;
 
   const handleFiles = async (selected: FileList | null) => {
     if (!selected || selected.length === 0) return;
@@ -77,6 +93,14 @@ export function AttachmentSection({
     const invalid = pick.find((f) => !/\.(pdf|jpe?g|png)$/i.test(f.name));
     if (invalid) {
       setError(`"${invalid.name}" — only PDF, JPG, JPEG and PNG are allowed.`);
+      return;
+    }
+    if (onStageFiles) {
+      onStageFiles(pick);
+      return;
+    }
+    if (!entityId) {
+      setError("Save the record first, then upload files.");
       return;
     }
     setUploading(true);
@@ -124,7 +148,8 @@ export function AttachmentSection({
         <Paperclip className="size-4" />
         {uploadLabel ?? title}
         <span className="ml-auto text-xs font-normal text-muted-foreground">
-          {shown.length} file{shown.length === 1 ? "" : "s"}
+          {shown.length + staged.length} file
+          {shown.length + staged.length === 1 ? "" : "s"}
         </span>
       </div>
 
@@ -136,7 +161,36 @@ export function AttachmentSection({
       )}
 
       <div className="mb-3 flex flex-col gap-2">
-        {shown.length === 0 ? (
+        {staged.length > 0 && (
+          <>
+            {staged.map((s) => (
+              <div
+                key={s.key}
+                className="flex items-center gap-3 rounded-lg border border-dashed border-primary/40 bg-primary/5 p-2.5"
+              >
+                {fileIcon(s.file.name)}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">
+                    {s.file.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatSize(s.file.size)} • will upload on save
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={() => onUnstageFile?.(s.key)}
+                  aria-label={`Remove ${s.file.name}`}
+                >
+                  <X className="size-4" />
+                </Button>
+              </div>
+            ))}
+          </>
+        )}
+        {shown.length === 0 && staged.length === 0 ? (
           <p className="text-sm text-muted-foreground">No attachments yet.</p>
         ) : (
           shown.map((f) => (
@@ -218,6 +272,7 @@ export function AttachmentSection({
       </Button>
       <p className="mt-1.5 text-xs text-muted-foreground">
         PDF, JPG, JPEG or PNG files only.
+        {onStageFiles ? " Selected files will upload after saving." : ""}
       </p>
     </div>
   );
