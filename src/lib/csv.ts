@@ -83,7 +83,7 @@ export function rowToPickupData(row: CsvRow): {
   return {
     stage: normalized["stage"] ?? "",
     sourcingDealNo: normalized["sourcingdealno"] ?? "",
-    pickup: normalized["pickup"] || undefined,
+    pickup: normalized["pickupnumber"] ?? (normalized["pickup"] || undefined),
     location: normalized["location"] || undefined,
     actualPickupDate: toDate(normalized["actualpickupdate"] ?? "") ?? undefined,
     actualDeliveredDate:
@@ -146,9 +146,10 @@ export function rowToPurchaseOrderData(row: CsvRow): PurchaseOrderCsvData {
   return {
     stage: n["postage"] ?? n["stage"] ?? "",
     sourcingDealNo: n["sourcingdealno"] ?? "",
-    pickup: n["pickup"] || undefined,
-    quoteNo: n["quote"] || undefined,
-    purchaseOrderNo: n["purchaseorder"] || undefined,
+    pickup: n["pickupnumber"] ?? (n["pickup"] || undefined),
+    quoteNo: n["quote"] ?? (n["quoteno"] || undefined),
+    purchaseOrderNo:
+      n["purchaseorder"] ?? (n["purchaseorderno"] ?? (n["pono"] || undefined)),
     locationCode: n["locationcode"] || undefined,
   };
 }
@@ -169,8 +170,9 @@ export function rowToPaymentData(row: CsvRow): PaymentCsvData {
   return {
     stage: n["stage"] ?? "",
     sourcingDealNo: n["sourcingdealno"] ?? "",
-    pickup: n["pickup"] || undefined,
-    purchaseOrderNo: n["purchaseorderno"] || undefined,
+    pickup: n["pickupnumber"] ?? (n["pickup"] || undefined),
+    purchaseOrderNo:
+      n["purchaseorderno"] ?? (n["purchaseorder"] ?? (n["pono"] || undefined)),
     payment: n["payment"] || undefined,
     totalInvoiceAmount: toFloat(n["totalinvoiceamount"] ?? ""),
     totalPaymentDone: toFloat(n["totalpaymentdone"] ?? ""),
@@ -197,7 +199,7 @@ export function rowToDataWipingData(row: CsvRow): DataWipingCsvData {
   return {
     status: n["status"] ?? "",
     sourcingDealNo: n["sourcingdealno"] ?? "",
-    pickup: n["pickup"] || undefined,
+    pickup: n["pickupnumber"] ?? (n["pickup"] || undefined),
     dataWipingId: n["datawipingid"] || undefined,
     laptop: toInt(n["laptop"] ?? ""),
     desktop: toInt(n["desktop"] ?? ""),
@@ -220,7 +222,7 @@ export function rowToCertificateData(row: CsvRow): CertificateCsvData {
   return {
     status: n["status"] ?? "",
     sourcingDealNo: n["sourcingdealno"] ?? "",
-    pickup: n["pickup"] || undefined,
+    pickup: n["pickupnumber"] ?? (n["pickup"] || undefined),
   };
 }
 
@@ -237,9 +239,9 @@ export type GrnCsvData = {
 export function rowToGrnData(row: CsvRow): GrnCsvData {
   const n = normalizeRow(row);
   return {
-    stage: n["stage"] ?? "",
+    stage: n["grnstage"] ?? n["stage"] ?? "",
     sourcingDealNo: n["sourcingdealno"] ?? "",
-    pickup: n["pickup"] || undefined,
+    pickup: n["pickupnumber"] ?? (n["pickup"] || undefined),
     grnDetails: n["grndetails"] || undefined,
     invoiceNumber: n["invoicenumber"] || undefined,
     invoiceDate: n["invoicedate"] || undefined,
