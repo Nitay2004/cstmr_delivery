@@ -6,10 +6,13 @@ services:
     restart: unless-stopped
     container_name: cstmr-portal-app
     ports:
-      - "0.0.0.0:3000:3000"
+      - "127.0.0.1:3001:3000"
     environment:
       DATABASE_URL: postgresql://cstmr:${POSTGRES_PASSWORD}@10.199.206.112:5432/cstmr_portal
       JWT_SECRET: ${JWT_SECRET}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_STORAGE_BUCKET: ${SUPABASE_STORAGE_BUCKET}
     volumes:
       - portal-uploads:/app/public/uploads
 
