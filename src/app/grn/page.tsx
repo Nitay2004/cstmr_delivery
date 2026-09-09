@@ -2,6 +2,7 @@
 
 import { ModuleTable } from "@/components/module-table";
 import { ModuleBulkUpload } from "@/components/module-bulk-upload";
+import { GrnStatCards, GRN_STAGES } from "@/components/grn-stat-cards";
 import { useUser, can } from "@/components/user-provider";
 import type { TableColumn, FormField } from "@/lib/module-config";
 
@@ -24,7 +25,7 @@ const formFields: FormField[] = [
     key: "stage",
     label: "Stage",
     required: true,
-    placeholder: "e.g. Pending, Received",
+    options: [...GRN_STAGES],
   },
   {
     key: "sourcingDealNo",
@@ -48,8 +49,8 @@ const formFields: FormField[] = [
 ];
 
 const SAMPLE_CSV = `Stage,Sourcing Deal No.,Pickup,GRN Details,Invoice Number,Invoice Date,Material Received Date
-Received,SD-1001,PU-001,GRN-1001,INV-1001,2026-08-01,2026-08-05
-Pending,SD-1002,PU-002,GRN-1002,INV-1002,2026-08-10,2026-08-12`;
+Material Received,SD-1001,PU-001,GRN-1001,INV-1001,2026-08-01,2026-08-05
+Completed,SD-1002,PU-002,GRN-1002,INV-1002,2026-08-10,2026-08-12`;
 
 export default function GrnPage() {
   const { user } = useUser();
@@ -76,6 +77,8 @@ export default function GrnPage() {
           />
         )}
       </div>
+
+      <GrnStatCards />
 
       <ModuleTable
         title="GRN"
