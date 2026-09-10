@@ -12,6 +12,7 @@ import {
   BarChart,
   CartesianGrid,
   LabelList,
+  Legend,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -36,6 +37,23 @@ const MONTH_DATA = [
 
 const TOTAL = CITY_DATA.reduce((sum, d) => sum + d.count, 0);
 
+const CATEGORY_DATA = [
+  { month: "Oct/25", Laptop: 7049, Desktop: 1746, "TFT / Monitor": 1344, "IP Phones": 0, Others: 0 },
+  { month: "Feb/26", Laptop: 186, Desktop: 0, "TFT / Monitor": 0, "IP Phones": 0, Others: 0 },
+  { month: "Apr/26", Laptop: 2643, Desktop: 5, "TFT / Monitor": 534, "IP Phones": 0, Others: 282 },
+  { month: "Jun/26", Laptop: 1325, Desktop: 0, "TFT / Monitor": 566, "IP Phones": 5285, Others: 0 },
+  { month: "Jul/26", Laptop: 81, Desktop: 0, "TFT / Monitor": 0, "IP Phones": 4972, Others: 63 },
+  { month: "Aug/26", Laptop: 689, Desktop: 5, "TFT / Monitor": 305, "IP Phones": 0, Others: 70 },
+];
+
+const CATEGORY_COLORS: { key: string; fill: string }[] = [
+  { key: "Laptop", fill: "var(--chart-1)" },
+  { key: "Desktop", fill: "var(--chart-2)" },
+  { key: "TFT / Monitor", fill: "var(--chart-3)" },
+  { key: "IP Phones", fill: "var(--chart-4)" },
+  { key: "Others", fill: "var(--chart-5)" },
+];
+
 function formatNumber(value: number): string {
   return value.toLocaleString("en-US");
 }
@@ -46,15 +64,32 @@ function ChartTooltip({
   label,
 }: {
   active?: boolean;
-  payload?: { value: number }[];
+  payload?: { value: number; dataKey?: string | number; name?: string }[];
   label?: string;
 }) {
   if (!active || !payload || payload.length === 0) return null;
+  if (payload.length === 1) {
+    return (
+      <div className="rounded-md border bg-background px-3 py-2 text-xs shadow-sm">
+        <div className="font-medium text-foreground">{label}</div>
+        <div className="mt-0.5 font-semibold text-primary">
+          {formatNumber(payload[0]?.value ?? 0)}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="rounded-md border bg-background px-3 py-2 text-xs shadow-sm">
       <div className="font-medium text-foreground">{label}</div>
-      <div className="mt-0.5 font-semibold text-primary">
-        {formatNumber(payload[0]?.value ?? 0)}
+      <div className="mt-1 flex flex-col gap-0.5">
+        {payload.map((entry, i) => (
+          <div key={i} className="flex items-center justify-between gap-3">
+            <span className="text-muted-foreground">{entry.name}</span>
+            <span className="font-semibold text-foreground">
+              {formatNumber(entry.value ?? 0)}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -149,6 +184,47 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="shadow-sm border-border">
+        <CardHeader>
+          <CardTitle className="text-base">Category Wise Devices by Month</CardTitle>
+          <CardDescription>
+            Device breakdown by category across months.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={CATEGORY_DATA} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/50" />
+              <XAxis
+                dataKey="month"
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 12 }}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                width={48}
+                tick={{ fontSize: 12 }}
+                tickFormatter={formatNumber}
+              />
+              <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--border)" }} />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              {CATEGORY_COLORS.map((c) => (
+                <Bar
+                  key={c.key}
+                  dataKey={c.key}
+                  stackId="device"
+                  fill={c.fill}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={56}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
     </div>
   );
 }
