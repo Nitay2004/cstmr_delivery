@@ -7,6 +7,9 @@ import { useUser, can } from "@/components/user-provider";
 import type { TableColumn, FormField } from "@/lib/module-config";
 
 const columns: TableColumn[] = [
+  { key: "status", label: "Status", badge: true },
+  { key: "sourcingDealNo", label: "Sourcing Deal No." },
+  { key: "pickup", label: "Pickup Number" },
   { key: "dataWipingId", label: "Data Wiping Id" },
   { key: "laptop", label: "Laptop", align: "right" },
   { key: "laptopSsdHddReceived", label: "SSD/HDD Received", align: "right" },
@@ -126,7 +129,7 @@ export default function DataWipingPage() {
         apiPath="/api/data-wiping"
         columns={columns}
         formFields={formFields}
-        searchFields={["dataWipingId"]}
+        searchFields={["dataWipingId", "status", "sourcingDealNo", "pickup"]}
         permissions={{
           view: "viewDataWiping",
           create: "createDataWiping",

@@ -95,9 +95,13 @@ export async function POST(request: NextRequest) {
       laptop: data.laptop,
       desktop: data.desktop,
       total: data.total,
+      laptopSsdHddReceived: data.laptopSsdHddReceived,
       laptopWiped: data.laptopWiped,
-      desktopWiped: data.desktopWiped,
+      laptopShreddingDone: data.laptopShreddingDone,
       laptopNotWiped: data.laptopNotWiped,
+      desktopSsdHddReceived: data.desktopSsdHddReceived,
+      desktopWiped: data.desktopWiped,
+      desktopShreddingDone: data.desktopShreddingDone,
       desktopNotWiped: data.desktopNotWiped,
       pickupRequestId: data.sourcingDealNo
         ? pickupMap.get(data.sourcingDealNo)
