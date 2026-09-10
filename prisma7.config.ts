@@ -3,6 +3,19 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
+// Office (main) - self-hosted PostgreSQL on DWMPL DB server
+const OFFICE_URL = process.env["OFFICE_DIRECT_URL"] ?? "";
+
+// Localhost - Supabase PostgreSQL
+const SUPABASE_URL = process.env["SUPABASE_DIRECT_URL"] ?? "";
+
+// Used by `npm run db:migrate:all` (prisma/migrate-all.ts) to apply
+// migrations to BOTH databases in a single run.
+export const DB_TARGETS = [
+  { name: "office", url: OFFICE_URL },
+  { name: "supabase", url: SUPABASE_URL },
+];
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {

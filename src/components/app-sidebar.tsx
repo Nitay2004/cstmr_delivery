@@ -47,7 +47,7 @@ export function AppSidebar() {
       items.push({ title: "Certificates", href: "/certificates", icon: BadgeCheck });
     }
     if (can(user, "viewGrn")) {
-      items.push({ title: "Change of Custody", href: "/grn", icon: ClipboardList });
+      items.push({ title: "Chain of Custody", href: "/grn", icon: ClipboardList });
     }
     if (can(user, "viewConsolidated")) {
       items.push({ title: "Consolidated", href: "/consolidated", icon: LayoutGrid });

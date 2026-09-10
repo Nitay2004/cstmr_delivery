@@ -19,6 +19,7 @@ export type QuoteStage = (typeof QUOTE_STAGES)[number];
 
 interface CardDef {
   stage: QuoteStage;
+  label?: string;
   match: RegExp;
   icon: LucideIcon;
   iconClass: string;
@@ -33,7 +34,8 @@ const CARD_DEFS: CardDef[] = [
   },
   {
     stage: "Pending for Allocation",
-    match: /pending\s*(for\s*)?allocation|allocation\s*pending|\bpending\b/,
+    label: "Pending for Approval",
+    match: /pending\s*(for\s*)?(allocation|approval)|(allocation|approval)\s*pending|\bpending\b/,
     icon: Clock,
     iconClass: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   },
@@ -106,7 +108,7 @@ export function QuoteStatCards() {
                 <Icon className="size-5" />
               </div>
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                {def.stage}
+                {def.label ?? def.stage}
               </CardTitle>
             </CardHeader>
             <CardContent>

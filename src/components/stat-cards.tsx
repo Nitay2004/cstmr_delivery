@@ -36,6 +36,7 @@ interface RequestSummary {
 
 interface CardDef {
   stage: PickupStage;
+  label?: string;
   icon: LucideIcon;
   iconClass: string;
 }
@@ -43,6 +44,7 @@ interface CardDef {
 const CARD_DEFS: CardDef[] = [
   {
     stage: "Pickup Request",
+    label: "Pending Pickup Request",
     icon: Package2,
     iconClass: "bg-primary/10 text-primary",
   },
@@ -115,7 +117,20 @@ export function StatCards() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-7">
+      <Card className="shadow-sm border-border">
+        <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            <CheckCircle2 className="size-5" />
+          </div>
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            Total Pickup Request
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold">{summary.total}</div>
+        </CardContent>
+      </Card>
       {CARD_DEFS.map((def) => {
         const Icon = def.icon;
         const count = summary.stages[normalizeStage(def.stage)] ?? 0;
@@ -128,7 +143,7 @@ export function StatCards() {
                 <Icon className="size-5" />
               </div>
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                {def.stage}
+                {def.label ?? def.stage}
               </CardTitle>
             </CardHeader>
             <CardContent>

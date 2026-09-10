@@ -222,7 +222,7 @@ export async function GET(request: NextRequest) {
     for (const r of rows) {
       add(
         "grn",
-        "Change of Custody",
+        "Chain of Custody",
         r.sourcingDealNo,
         [r.invoiceNumber, r.grnDetails].filter(Boolean).join(" • ") || r.stage,
         `/grn?q=${encodeURIComponent(term)}`,
