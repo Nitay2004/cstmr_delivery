@@ -22,10 +22,10 @@ import {
 
 const REQUIRED_COLUMNS = ["stage", "sourcingDealNo"];
 
-const SAMPLE_CSV = `stage,sourcingDealNo,pickup,location,actualPickupDate,actualDeliveredDate
-Picked Up,SD-1001,John's Warehouse,Mumbai,2026-08-01,2026-08-05
-In Transit,SD-1002,ABC Logistics,Delhi,2026-08-10,
-Delivered,SD-1003,XYZ Depot,Chennai,2026-08-12,2026-08-15`;
+const SAMPLE_CSV = `stage,sourcingDealNo,pickup,location,accessPoint,desktop,ipTelephonyEpbxDevices,laptop,mixEWaste,mixPeripherals,mobile,router,server,switch,tablet,tftMonitor,actualPickupDate,actualDeliveredDate
+Picked Up,SD-1001,John's Warehouse,Mumbai,2,3,0,5,1,2,4,0,1,0,3,2,2026-08-01,2026-08-05
+In Transit,SD-1002,ABC Logistics,Delhi,0,1,0,2,0,0,3,1,0,0,1,0,2026-08-10,
+Delivered,SD-1003,XYZ Depot,Chennai,1,0,0,0,4,0,0,0,0,0,0,1,2026-08-12,2026-08-15`;
 
 interface SkippedRow {
   row: number;
@@ -125,6 +125,7 @@ export function BulkUpload() {
             <p className="font-medium text-foreground">Required columns</p>
             <code className="mt-1 block text-xs leading-relaxed text-muted-foreground">
               {REQUIRED_COLUMNS.join(", ")}, optional: pickup, location,
+              device counts (Access Point, Desktop, Laptop, ...),
               actualPickupDate, actualDeliveredDate
             </code>
           </div>

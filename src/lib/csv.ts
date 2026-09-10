@@ -1,3 +1,5 @@
+import { PICKUP_DEVICE_FIELDS } from "@/lib/pickup-devices";
+
 export type CsvRow = Record<string, string>;
 
 export function parseCsv(text: string): { rows: CsvRow[]; headers: string[] } {
@@ -74,11 +76,30 @@ export function rowToPickupData(row: CsvRow): {
   location?: string;
   actualPickupDate?: Date;
   actualDeliveredDate?: Date;
+  accessPoint?: number;
+  desktop?: number;
+  ipTelephonyEpbxDevices?: number;
+  laptop?: number;
+  mixEWaste?: number;
+  mixPeripherals?: number;
+  mobile?: number;
+  router?: number;
+  server?: number;
+  switch?: number;
+  tablet?: number;
+  tftMonitor?: number;
 } {
   const normalized: Record<string, string> = {};
   Object.entries(row).forEach(([key, value]) => {
     normalized[normalizeHeader(key)] = (value ?? "").trim();
   });
+
+  const deviceValues: Record<string, number | undefined> = {};
+  for (const field of PICKUP_DEVICE_FIELDS) {
+    deviceValues[field.key] = toInt(
+      normalized[normalizeHeader(field.key)] ?? ""
+    );
+  }
 
   return {
     stage: normalized["stage"] ?? "",
@@ -88,6 +109,7 @@ export function rowToPickupData(row: CsvRow): {
     actualPickupDate: toDate(normalized["actualpickupdate"] ?? "") ?? undefined,
     actualDeliveredDate:
       toDate(normalized["actualdelivereddate"] ?? "") ?? undefined,
+    ...deviceValues,
   };
 }
 
