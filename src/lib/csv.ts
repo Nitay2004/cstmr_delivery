@@ -445,3 +445,31 @@ export function rowToConsolidatedData(row: CsvRow): ConsolidatedCsvData {
     amount: toFloat(n["amount"] ?? ""),
   };
 }
+
+export type DataWipingMasterCsvData = {
+  pickupId?: string;
+  serialNumber?: string;
+  assetType?: string;
+  hddSerialNumber?: string;
+  dataWipingDate?: string;
+  uuid?: string;
+  size?: string;
+  pdfName?: string;
+};
+
+export function rowToDataWipingMasterData(
+  row: CsvRow
+): DataWipingMasterCsvData {
+  const n = normalizeRow(row);
+  return {
+    pickupId: n["pickupid"] ?? n["pickupnumber"] ?? undefined,
+    serialNumber:
+      n["serialnumber"] ?? (n["assetag"] || n["serialnumberassettag"] || undefined),
+    assetType: n["assettype"] || undefined,
+    hddSerialNumber: n["hddserialnumber"] || undefined,
+    dataWipingDate: n["datawipingdate"] || undefined,
+    uuid: n["uuid"] || undefined,
+    size: n["size"] || undefined,
+    pdfName: n["pdfname"] || undefined,
+  };
+}

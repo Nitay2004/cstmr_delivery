@@ -45,6 +45,14 @@ export async function proxy(request: NextRequest) {
   }
 
   if (
+    pathname.startsWith("/data-wiping-master")
+  ) {
+    if (!user.permissions.viewDataWipingMaster) {
+      return NextResponse.redirect(new URL("/dashboard", baseUrl));
+    }
+  }
+
+  if (
     pathname.startsWith("/quotes") ||
     pathname.startsWith("/purchase-orders") ||
     pathname.startsWith("/payments") ||

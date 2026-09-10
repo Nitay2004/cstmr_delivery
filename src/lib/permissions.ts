@@ -36,6 +36,11 @@ export interface Permissions {
   editGrn: boolean;
   deleteGrn: boolean;
   importGrn: boolean;
+  viewDataWipingMaster: boolean;
+  createDataWipingMaster: boolean;
+  editDataWipingMaster: boolean;
+  deleteDataWipingMaster: boolean;
+  importDataWipingMaster: boolean;
   viewConsolidated: boolean;
   createConsolidated: boolean;
   editConsolidated: boolean;
@@ -84,6 +89,11 @@ export function emptyPermissions(): Permissions {
     editGrn: false,
     deleteGrn: false,
     importGrn: false,
+    viewDataWipingMaster: false,
+    createDataWipingMaster: false,
+    editDataWipingMaster: false,
+    deleteDataWipingMaster: false,
+    importDataWipingMaster: false,
     viewConsolidated: false,
     createConsolidated: false,
     editConsolidated: false,
@@ -131,6 +141,11 @@ export const ROLE_PRESETS: Record<Role, Permissions> = {
     editGrn: true,
     deleteGrn: true,
     importGrn: true,
+    viewDataWipingMaster: true,
+    createDataWipingMaster: true,
+    editDataWipingMaster: true,
+    deleteDataWipingMaster: true,
+    importDataWipingMaster: true,
     viewConsolidated: true,
     createConsolidated: true,
     editConsolidated: true,
@@ -175,6 +190,11 @@ export const ROLE_PRESETS: Record<Role, Permissions> = {
     editGrn: true,
     deleteGrn: false,
     importGrn: true,
+    viewDataWipingMaster: true,
+    createDataWipingMaster: true,
+    editDataWipingMaster: true,
+    deleteDataWipingMaster: false,
+    importDataWipingMaster: true,
     viewConsolidated: true,
     createConsolidated: true,
     editConsolidated: true,
@@ -219,6 +239,11 @@ export const ROLE_PRESETS: Record<Role, Permissions> = {
     editGrn: false,
     deleteGrn: false,
     importGrn: false,
+    viewDataWipingMaster: true,
+    createDataWipingMaster: false,
+    editDataWipingMaster: false,
+    deleteDataWipingMaster: false,
+    importDataWipingMaster: false,
     viewConsolidated: true,
     createConsolidated: false,
     editConsolidated: false,
@@ -410,6 +435,31 @@ export const PERMISSION_DEFS: {
     key: "importGrn",
     label: "Bulk Import GRN",
     description: "Import GRN records from CSV/Excel.",
+  },
+  {
+    key: "viewDataWipingMaster",
+    label: "View Data Wiping Master",
+    description: "See the data wiping master page and data.",
+  },
+  {
+    key: "createDataWipingMaster",
+    label: "Create Data Wiping Master",
+    description: "Create new data wiping master records.",
+  },
+  {
+    key: "editDataWipingMaster",
+    label: "Edit Data Wiping Master",
+    description: "Edit existing data wiping master records.",
+  },
+  {
+    key: "deleteDataWipingMaster",
+    label: "Delete Data Wiping Master",
+    description: "Delete existing data wiping master records.",
+  },
+  {
+    key: "importDataWipingMaster",
+    label: "Bulk Import Data Wiping Master",
+    description: "Import data wiping master records from CSV/Excel.",
   },
   {
     key: "viewConsolidated",

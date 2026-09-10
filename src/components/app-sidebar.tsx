@@ -3,7 +3,7 @@
 import * as React from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { PackageOpen, Users, FileText, FileSignature, CreditCard, HardDrive, BadgeCheck, ClipboardList, LayoutGrid, LayoutDashboard } from "lucide-react"
+import { PackageOpen, Users, FileText, FileSignature, CreditCard, HardDrive, BadgeCheck, ClipboardList, LayoutGrid, LayoutDashboard, Database } from "lucide-react"
 
 import {
   Sidebar,
@@ -43,6 +43,9 @@ export function AppSidebar() {
     }
     if (can(user, "viewDataWiping")) {
       items.push({ title: "Data Wiping", href: "/data-wiping", icon: HardDrive });
+    }
+    if (can(user, "viewDataWipingMaster")) {
+      items.push({ title: "Data Wiping Master", href: "/data-wiping-master", icon: Database });
     }
     if (can(user, "viewCertificate")) {
       items.push({ title: "Certificates", href: "/certificates", icon: BadgeCheck });

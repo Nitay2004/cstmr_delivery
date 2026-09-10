@@ -202,6 +202,26 @@ model DataWipingFile {
   @@index([dataWipingId])
 }
 
+model DataWipingMaster {
+  id                String     @id @default(cuid())
+  pickupId          String?
+  serialNumber      String?
+  assetType         String?
+  hddSerialNumber   String?
+  dataWipingDate    String?
+  uuid              String?
+  size              String?
+  pdfName           String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  @@index([pickupId])
+  @@index([serialNumber])
+  @@index([assetType])
+  @@index([hddSerialNumber])
+  @@index([uuid])
+}
+
 model Certificate {
   id              String            @id @default(cuid())
   status          String
