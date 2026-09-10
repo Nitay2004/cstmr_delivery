@@ -19,7 +19,7 @@ jobs:
           cd /opt/cstmr_portal
           sudo git fetch origin main
           sudo git reset --hard origin/main
-          sudo docker run --rm -v /opt/cstmr_portal:/repo -w /repo --env-file /opt/cstmr_portal/.env node:22-alpine sh -c "cd /repo && npx --yes prisma@7.10.0 migrate deploy --schema prisma/schema.prisma"
+          sudo docker run --rm -v /opt/cstmr_portal:/repo -w /repo -e DATABASE_URL="$(grep '^DATABASE_URL=' /opt/cstmr_portal/.env | sed 's/^[^=]*=//; s/^"//; s/"$//')" node:22-alpine sh -c "cd /repo && npx --yes prisma@7.10.0 migrate deploy --schema prisma/schema.prisma"
           cd deploy
           sudo docker compose -p deploy -f docker-compose.prod.yml --env-file /opt/cstmr_portal/.env build
           sudo docker compose -p deploy -f docker-compose.prod.yml --env-file /opt/cstmr_portal/.env up -d
