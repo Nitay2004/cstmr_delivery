@@ -1,0 +1,259 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, Inbox, Loader2 } from "lucide-react";
+
+interface Item {
+  id: string;
+  pickupId?: string | null;
+  serialNumber?: string | null;
+  assetType?: string | null;
+  hddSerialNumber?: string | null;
+  dataWipingDate?: string | null;
+  uuid?: string | null;
+  size?: string | null;
+  pdfName?: string | null;
+}
+
+const API_PATH = "/api/data-wiping-master";
+
+const COLUMNS: { key: keyof Item; label: string }[] = [
+  { key: "serialNumber", label: "Serial number / Asset Tag" },
+  { key: "assetType", label: "Asset Type" },
+  { key: "hddSerialNumber", label: "HDD Serial Number" },
+  { key: "dataWipingDate", label: "Data Wiping Date" },
+  { key: "uuid", label: "UUID" },
+  { key: "size", label: "Size" },
+  { key: "pdfName", label: "PDF Name" },
+];
+
+function display(value: unknown): string {
+  if (value === null || value === undefined || value === "") return "—";
+  return String(value);
+}
+
+interface Props {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  pickup: string;
+  deviceType: "Laptop" | "Desktop";
+}
+
+export function DeviceDetailSheet({
+  open,
+  onOpenChange,
+  pickup,
+  deviceType,
+}: Props) {
+  const [items, setItems] = useState<Item[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const resetKey = `${open ? "1" : "0"}|${pickup}|${deviceType}`;
+  const [prevKey, setPrevKey] = useState(resetKey);
+  if (prevKey !== resetKey) {
+    setPrevKey(resetKey);
+    setItems([]);
+    setTotal(0);
+    setLoading(true);
+    setError(null);
+    setPage(1);
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    const controller = new AbortController();
+    const params = new URLSearchParams({
+      page: String(page),
+      pageSize: String(pageSize),
+      pickupId: pickup,
+      assetType: deviceType,
+    });
+    fetch(`${API_PATH}?${params.toString()}`, { signal: controller.signal })
+      .then((res) => res.json())
+      .then((data) => {
+        if (controller.signal.aborted) return;
+        if (Array.isArray(data.items)) setItems(data.items);
+        else setItems([]);
+        setTotal(
+          typeof data.total === "number"
+            ? data.total
+            : Array.isArray(data.items)
+              ? data.items.length
+              : 0
+        );
+      })
+      .catch((err: unknown) => {
+        if (!controller.signal.aborted) {
+          setError(err instanceof Error ? err.message : "Failed to load");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [open, pickup, deviceType, page, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const currentPage = Math.min(page, totalPages);
+
+  const goToPage = (p: number) => {
+    setPage(p);
+    setLoading(true);
+    setError(null);
+  };
+
+  const changePageSize = (n: number) => {
+    setPageSize(n);
+    setPage(1);
+    setLoading(true);
+    setError(null);
+  };
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" showCloseButton className="w-full sm:max-w-3xl">
+        <SheetHeader>
+          <SheetTitle>
+            {deviceType} details — {pickup || "Unknown Pickup"}
+          </SheetTitle>
+          <SheetDescription>
+            {total.toLocaleString("en-IN")} {deviceType.toLowerCase()}
+            {total === 1 ? "" : "s"} for this pick up.
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="flex flex-1 flex-col gap-3 overflow-auto px-4 pb-4">
+          <div className="overflow-x-auto rounded-lg border">
+            <Table>
+              <TableHeader className="bg-muted/30">
+                <TableRow>
+                  {COLUMNS.map((col) => (
+                    <TableHead key={col.key} className="whitespace-nowrap">
+                      {col.label}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={COLUMNS.length} className="h-40 text-center">
+                      <Loader2 className="mx-auto size-6 animate-spin text-muted-foreground" />
+                    </TableCell>
+                  </TableRow>
+                ) : error ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={COLUMNS.length}
+                      className="h-40 text-center text-destructive"
+                    >
+                      <div className="flex flex-col items-center gap-2">
+                        <AlertTriangle className="size-8 text-destructive/60" />
+                        <p className="text-sm">{error}</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : items.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={COLUMNS.length}
+                      className="h-40 text-center text-muted-foreground"
+                    >
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <Inbox className="size-8 text-muted-foreground/60" />
+                        <p className="text-sm font-medium text-foreground">
+                          No {deviceType.toLowerCase()} records for this pick up
+                        </p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  items.map((r) => (
+                    <TableRow key={r.id} className="hover:bg-muted/50">
+                      {COLUMNS.map((col) => (
+                        <TableCell
+                          key={col.key}
+                          className={
+                            col.key === "serialNumber"
+                              ? "whitespace-nowrap font-medium text-foreground"
+                              : "whitespace-nowrap"
+                          }
+                        >
+                          {display(r[col.key])}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {total > 0 && (
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <span>
+                  Showing {(currentPage - 1) * pageSize + 1}–
+                  {Math.min(currentPage * pageSize, total)} of{" "}
+                  {total.toLocaleString("en-IN")}
+                </span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => changePageSize(Number(e.target.value))}
+                  className="rounded-md border bg-transparent px-2 py-1 text-sm"
+                >
+                  {[5, 10, 20, 50].map((n) => (
+                    <option key={n} value={n}>
+                      {n} / page
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  disabled={currentPage <= 1}
+                  onClick={() => goToPage(Math.max(1, currentPage - 1))}
+                >
+                  ←
+                </Button>
+                <span className="px-2 text-sm text-muted-foreground">
+                  {currentPage} / {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
+                >
+                  →
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}

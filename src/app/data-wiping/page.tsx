@@ -1,27 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { ModuleTable } from "@/components/module-table";
 import { ModuleBulkUpload } from "@/components/module-bulk-upload";
 import { DataWipingStatCards, DATA_WIPING_STAGES } from "@/components/data-wiping-stat-cards";
+import { DeviceDetailSheet } from "@/components/device-detail-sheet";
 import { useUser, can } from "@/components/user-provider";
-import type { TableColumn, FormField } from "@/lib/module-config";
-
-const columns: TableColumn[] = [
-  { key: "status", label: "Status", badge: true },
-  { key: "sourcingDealNo", label: "Sourcing Deal No." },
-  { key: "pickup", label: "Pickup Number" },
-  { key: "dataWipingId", label: "Data Wiping Id" },
-  { key: "laptop", label: "Laptop", align: "right" },
-  { key: "laptopSsdHddReceived", label: "SSD/HDD Received", align: "right" },
-  { key: "laptopWiped", label: "Laptop Data Sanitized", align: "right" },
-  { key: "laptopShreddingDone", label: "Shredding Done", align: "right" },
-  { key: "laptopNotWiped", label: "Laptop SSD Not Received", align: "right" },
-  { key: "desktop", label: "Desktop", align: "right" },
-  { key: "desktopSsdHddReceived", label: "SSD/HDD Received", align: "right" },
-  { key: "desktopWiped", label: "Desktop Data Sanitized", align: "right" },
-  { key: "desktopShreddingDone", label: "Shredding Done", align: "right" },
-  { key: "desktopNotWiped", label: "Desktop SSD Not Received", align: "right" },
-];
+import type { TableColumn, FormField, ModuleRow } from "@/lib/module-config";
 
 const formFields: FormField[] = [
   {
@@ -96,6 +81,57 @@ Completed,SD-1002,PU-002,DW-0002,20,18,18,18,0,10,9,9,9,0`;
 
 export default function DataWipingPage() {
   const { user } = useUser();
+  const [detail, setDetail] = useState<{
+    pickup: string;
+    deviceType: "Laptop" | "Desktop";
+  } | null>(null);
+
+  const openDetail = (pickup: string, deviceType: "Laptop" | "Desktop") => {
+    if (!pickup) return;
+    setDetail({ pickup, deviceType });
+  };
+
+  const countLink = (row: ModuleRow, deviceType: "Laptop" | "Desktop") => {
+    const value = Number(row[deviceType.toLowerCase()] ?? 0);
+    if (!value || value <= 0) return <span className="text-muted-foreground">—</span>;
+    return (
+      <button
+        type="button"
+        onClick={() => openDetail(String(row.pickup ?? ""), deviceType)}
+        className="font-medium text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
+        title={`View ${deviceType} details for ${String(row.pickup ?? "")}`}
+      >
+        {value.toLocaleString("en-IN")}
+      </button>
+    );
+  };
+
+  const columns: TableColumn[] = [
+    { key: "status", label: "Status", badge: true },
+    { key: "sourcingDealNo", label: "Sourcing Deal No." },
+    { key: "pickup", label: "Pickup Number" },
+    { key: "dataWipingId", label: "Data Wiping Id" },
+    {
+      key: "laptop",
+      label: "Laptop",
+      align: "right",
+      render: (row) => countLink(row, "Laptop"),
+    },
+    { key: "laptopSsdHddReceived", label: "SSD/HDD Received", align: "right" },
+    { key: "laptopWiped", label: "Laptop Data Sanitized", align: "right" },
+    { key: "laptopShreddingDone", label: "Shredding Done", align: "right" },
+    { key: "laptopNotWiped", label: "Laptop SSD Not Received", align: "right" },
+    {
+      key: "desktop",
+      label: "Desktop",
+      align: "right",
+      render: (row) => countLink(row, "Desktop"),
+    },
+    { key: "desktopSsdHddReceived", label: "SSD/HDD Received", align: "right" },
+    { key: "desktopWiped", label: "Desktop Data Sanitized", align: "right" },
+    { key: "desktopShreddingDone", label: "Shredding Done", align: "right" },
+    { key: "desktopNotWiped", label: "Desktop SSD Not Received", align: "right" },
+  ];
 
   return (
     <div className="flex flex-1 flex-col gap-6">
@@ -137,6 +173,15 @@ export default function DataWipingPage() {
           del: "deleteDataWiping",
         }}
         attach={{ module: "data-wiping", title: "Data Wiping" }}
+      />
+
+      <DeviceDetailSheet
+        open={detail !== null}
+        onOpenChange={(open) => {
+          if (!open) setDetail(null);
+        }}
+        pickup={detail?.pickup ?? ""}
+        deviceType={detail?.deviceType ?? "Laptop"}
       />
     </div>
   );

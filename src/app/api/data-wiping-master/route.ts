@@ -32,15 +32,21 @@ export async function GET(request: NextRequest) {
   const page = parseIntSafe(searchParams.get("page"), 1);
   const pageSize = Math.min(parseIntSafe(searchParams.get("pageSize"), 10), 100);
   const search = (searchParams.get("search") ?? "").trim();
+  const pickupId = (searchParams.get("pickupId") ?? "").trim();
+  const assetType = (searchParams.get("assetType") ?? "").trim();
 
-  const where =
-    search === ""
-      ? undefined
-      : {
-          OR: SEARCH_FIELDS.map((field) => ({
-            [field]: { contains: search, mode: "insensitive" as const },
-          })),
-        };
+  const where: Record<string, unknown> = {};
+  if (search !== "") {
+    where.OR = SEARCH_FIELDS.map((field) => ({
+      [field]: { contains: search, mode: "insensitive" as const },
+    }));
+  }
+  if (pickupId !== "") {
+    where.pickupId = pickupId;
+  }
+  if (assetType !== "") {
+    where.assetType = { equals: assetType, mode: "insensitive" as const };
+  }
 
   const [total, items] = await Promise.all([
     prisma.dataWipingMaster.count({ where }),

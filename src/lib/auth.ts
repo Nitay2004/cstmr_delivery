@@ -56,12 +56,16 @@ export async function verifyToken(
 ): Promise<AuthUser | null> {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
+    const role = (payload.role as Role) ?? "VIEWER";
     return {
       id: payload.sub as string,
       email: payload.email as string,
       name: payload.name as string | null,
-      role: (payload.role as Role) ?? "VIEWER",
-      permissions: (payload.permissions as Permissions) ?? resolvePermissions("VIEWER"),
+      role,
+      permissions: resolvePermissions(
+        role,
+        payload.permissions as Record<string, unknown> | undefined
+      ),
     };
   } catch {
     return null;
