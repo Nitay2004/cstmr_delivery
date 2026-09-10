@@ -5,6 +5,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { AuthHeader } from "@/components/auth-header";
+import { GlobalSearch } from "@/components/global-search";
 import { useUser } from "@/components/user-provider";
 import type { ReactNode } from "react";
 
@@ -31,7 +32,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               {user?.name ?? "there"}
             </span>
           </span>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-3">
+            <GlobalSearch />
             <AuthHeader />
           </div>
         </header>

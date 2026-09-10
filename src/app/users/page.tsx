@@ -33,6 +33,7 @@ import {
   Pencil,
   Plus,
   RefreshCcw,
+  Search,
   Shield,
   ShieldCheck,
   Trash2,
@@ -92,6 +93,10 @@ export default function UsersPage() {
   const [users, setUsers] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return new URLSearchParams(window.location.search).get("q") ?? "";
+  });
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<AppUser | null>(null);
@@ -239,6 +244,16 @@ export default function UsersPage() {
     return counts;
   }, [users]);
 
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredUsers = normalizedQuery
+    ? users.filter(
+        (u) =>
+          (u.name ?? "").toLowerCase().includes(normalizedQuery) ||
+          u.email.toLowerCase().includes(normalizedQuery) ||
+          u.role.toLowerCase().includes(normalizedQuery)
+      )
+    : users;
+
   return (
     <div className="flex flex-1 flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -303,8 +318,18 @@ export default function UsersPage() {
           <div>
             <CardTitle className="text-lg">Users</CardTitle>
             <CardDescription>
-              {users.length} user{users.length === 1 ? "" : "s"} in the system
+              {users.length} user{users.length === 1 ? "" : "s"} in the system{" "}
+              {normalizedQuery && `• ${filteredUsers.length} shown`}
             </CardDescription>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search users..."
+              className="h-9 w-64 pl-8"
+            />
           </div>
         </CardHeader>
 
@@ -336,17 +361,19 @@ export default function UsersPage() {
                   </div>
                 </TableCell>
               </TableRow>
-            ) : users.length === 0 ? (
+            ) : filteredUsers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="h-40 text-center text-muted-foreground">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Inbox className="size-8 text-muted-foreground/60" />
-                    <p className="text-sm font-medium text-foreground">No users</p>
+                    <p className="text-sm font-medium text-foreground">
+                      {normalizedQuery ? "No matching users" : "No users"}
+                    </p>
                   </div>
                 </TableCell>
               </TableRow>
             ) : (
-              users.map((u) => (
+              filteredUsers.map((u) => (
                 <TableRow key={u.id} className="hover:bg-muted/50">
                   <TableCell>
                     <div className="flex items-center gap-3">
