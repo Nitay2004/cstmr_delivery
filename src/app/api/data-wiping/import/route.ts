@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { rowToDataWipingData } from "@/lib/csv";
-import { parseImportFile } from "@/lib/parse-import";
+import { normalizeHeader, rowToDataWipingMatrix } from "@/lib/csv";
+import { parseImportMatrix } from "@/lib/parse-import";
 import { pickupDealIdMap } from "@/lib/links";
 import type { DataWipingCreateManyInput } from "@/generated/prisma/models/DataWiping";
 
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { rows, headers } = await parseImportFile(file);
+  const { headers, rows } = await parseImportMatrix(file);
   if (rows.length === 0) {
     return NextResponse.json(
       { error: "No data rows found in the file" },
@@ -40,9 +40,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const normalizedHeaders = headers.map((h) =>
-    h.trim().toLowerCase().replace(/\s+/g, "").replace(/[^a-z0-9]/g, "")
-  );
+  const normalizedHeaders = headers.map((h) => normalizeHeader(h));
   const missing: string[] = [];
   const hasStatus =
     normalizedHeaders.includes("status") ||
@@ -78,8 +76,8 @@ export async function POST(request: NextRequest) {
   const valid: CreateData[] = [];
   const skipped: { row: number; reason: string }[] = [];
 
-  rows.forEach((row, index) => {
-    const data = rowToDataWipingData(row);
+  rows.forEach((rowValues, index) => {
+    const data = rowToDataWipingMatrix(headers, rowValues);
     if (!data.status || !data.sourcingDealNo || !data.pickup || !data.dataWipingId) {
       skipped.push({
         row: index + 2,

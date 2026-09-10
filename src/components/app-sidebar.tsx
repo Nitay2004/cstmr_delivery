@@ -3,7 +3,7 @@
 import * as React from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { PackageOpen, Users, FileText, FileSignature, CreditCard, HardDrive, BadgeCheck, ClipboardList, LayoutGrid } from "lucide-react"
+import { PackageOpen, Users, FileText, FileSignature, CreditCard, HardDrive, BadgeCheck, ClipboardList, LayoutGrid, LayoutDashboard } from "lucide-react"
 
 import {
   Sidebar,
@@ -28,6 +28,7 @@ export function AppSidebar() {
       href: string;
       icon: React.ComponentType<{ className?: string }>;
     }[] = [];
+    items.push({ title: "Dashboard", href: "/dashboard", icon: LayoutDashboard });
     if (can(user, "viewPickupRequests")) {
       items.push({ title: "Pickup Request", href: "/pickup-request", icon: PackageOpen });
     }
@@ -63,7 +64,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href="/pickup-request" />}>
+            <SidebarMenuButton size="lg" render={<Link href="/dashboard" />}>
               <div className="flex aspect-square size-11 shrink-0 items-center justify-center overflow-hidden rounded-md">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

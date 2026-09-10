@@ -24,15 +24,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (pathname === "/dashboard") {
-    return NextResponse.redirect(new URL("/pickup-request", baseUrl));
-  }
-
   const user = token ? await getCurrentUserFromToken(token) : null;
 
   if (isPublicPage) {
     if (user) {
-      return NextResponse.redirect(new URL("/pickup-request", baseUrl));
+      return NextResponse.redirect(new URL("/dashboard", baseUrl));
     }
     return NextResponse.next();
   }
@@ -44,7 +40,7 @@ export async function proxy(request: NextRequest) {
 
   if (pathname.startsWith("/users")) {
     if (!user.permissions.manageUsers) {
-      return NextResponse.redirect(new URL("/pickup-request", baseUrl));
+      return NextResponse.redirect(new URL("/dashboard", baseUrl));
     }
   }
 
@@ -71,7 +67,7 @@ export async function proxy(request: NextRequest) {
                 ? "viewGrn"
                 : "viewConsolidated";
     if (!user.permissions[perm as keyof typeof user.permissions]) {
-      return NextResponse.redirect(new URL("/pickup-request", baseUrl));
+      return NextResponse.redirect(new URL("/dashboard", baseUrl));
     }
   }
 

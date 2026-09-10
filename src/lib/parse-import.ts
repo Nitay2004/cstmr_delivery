@@ -1,4 +1,4 @@
-import { parseCsv, type CsvRow } from "./csv";
+import { parseCsv, parseCsvMatrix, type CsvRow } from "./csv";
 import * as XLSX from "xlsx";
 
 export type ParsedSheet = {
@@ -48,4 +48,34 @@ export async function parseImportFile(file: File): Promise<ParsedSheet> {
 
   const text = await file.text();
   return parseCsv(text);
+}
+
+export async function parseImportMatrix(
+  file: File
+): Promise<{ headers: string[]; rows: string[][] }> {
+  const name = file.name.toLowerCase();
+
+  if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const workbook = XLSX.read(buffer, { type: "buffer", cellDates: true });
+    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+    if (!firstSheet) return { headers: [], rows: [] };
+
+    const aoa = XLSX.utils.sheet_to_json<unknown[]>(firstSheet, {
+      header: 1,
+      defval: "",
+      raw: false,
+    });
+    if (aoa.length === 0) return { headers: [], rows: [] };
+
+    const headers = (aoa[0] ?? []).map((h) => String(h ?? "").trim());
+    const rows: string[][] = aoa.slice(1).map((row) =>
+      headers.map((_, index) => normalizeValue(row?.[index]))
+    );
+
+    return { headers, rows };
+  }
+
+  const text = await file.text();
+  return parseCsvMatrix(text);
 }

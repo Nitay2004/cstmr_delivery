@@ -90,7 +90,7 @@ const formFields: FormField[] = [
   },
 ];
 
-const SAMPLE_CSV = `Status,Sourcing Deal No.,Pickup,Data Wiping Id,Laptop,Laptop SSD/HDD Received,Laptop Data Sanitized,Laptop Shredding Done,Laptop SSD Not Received,Desktop,Desktop SSD/HDD Received,Desktop Data Sanitized,Desktop Shredding Done,Desktop SSD Not Received
+const SAMPLE_CSV = `Status,Sourcing Deal No.,Pickup Number,Data Wiping Id,Laptop,SSD/HDD Received,Laptop Data Sanitized,Shredding Done,Laptop SSD Not Received,Desktop,SSD/HDD Received,Desktop Data Sanitized,Shredding Done,Desktop SSD Not Received
 Under Process,SD-1001,PU-001,DW-0001,10,8,6,5,2,5,4,3,3,1
 Completed,SD-1002,PU-002,DW-0002,20,18,18,18,0,10,9,9,9,0`;
 
@@ -113,8 +113,8 @@ export default function DataWipingPage() {
             apiPath="/api/data-wiping/import"
             title="Bulk Upload Data Wiping"
             description="Import data wiping records from a CSV or Excel file."
-            requiredColumns="Status, Sourcing Deal No., Pickup, Data Wiping Id"
-            optionalColumns="Laptop, Laptop SSD/HDD Received, Laptop Data Sanitized, Laptop Shredding Done, Laptop SSD Not Received, Desktop, Desktop SSD/HDD Received, Desktop Data Sanitized, Desktop Shredding Done, Desktop SSD Not Received"
+            requiredColumns="Status, Sourcing Deal No., Pickup Number, Data Wiping Id"
+            optionalColumns="Laptop, SSD/HDD Received, Laptop Data Sanitized, Shredding Done, Laptop SSD Not Received, Desktop, SSD/HDD Received, Desktop Data Sanitized, Shredding Done, Desktop SSD Not Received"
             sampleCsv={SAMPLE_CSV}
           />
         )}

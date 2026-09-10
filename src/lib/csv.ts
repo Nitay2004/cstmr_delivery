@@ -2,44 +2,44 @@ import { PICKUP_DEVICE_FIELDS } from "@/lib/pickup-devices";
 
 export type CsvRow = Record<string, string>;
 
+function parseLine(line: string): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (inQuotes) {
+      if (char === '"') {
+        if (line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += char;
+      }
+    } else {
+      if (char === '"') {
+        inQuotes = true;
+      } else if (char === ",") {
+        result.push(current.trim());
+        current = "";
+      } else {
+        current += char;
+      }
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
 export function parseCsv(text: string): { rows: CsvRow[]; headers: string[] } {
   const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
   if (lines.length === 0) {
     return { rows: [], headers: [] };
   }
-
-  const parseLine = (line: string): string[] => {
-    const result: string[] = [];
-    let current = "";
-    let inQuotes = false;
-
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      if (inQuotes) {
-        if (char === '"') {
-          if (line[i + 1] === '"') {
-            current += '"';
-            i++;
-          } else {
-            inQuotes = false;
-          }
-        } else {
-          current += char;
-        }
-      } else {
-        if (char === '"') {
-          inQuotes = true;
-        } else if (char === ",") {
-          result.push(current.trim());
-          current = "";
-        } else {
-          current += char;
-        }
-      }
-    }
-    result.push(current.trim());
-    return result;
-  };
 
   const headers = parseLine(lines[0]);
   const rows: CsvRow[] = lines.slice(1).map((line) => {
@@ -52,6 +52,23 @@ export function parseCsv(text: string): { rows: CsvRow[]; headers: string[] } {
   });
 
   return { rows, headers };
+}
+
+export function parseCsvMatrix(
+  text: string
+): { headers: string[]; rows: string[][] } {
+  const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
+  if (lines.length === 0) {
+    return { headers: [], rows: [] };
+  }
+
+  const headers = parseLine(lines[0]);
+  const rows: string[][] = lines.slice(1).map((line) => {
+    const values = parseLine(line);
+    return headers.map((_, index) => values[index] ?? "");
+  });
+
+  return { headers, rows };
 }
 
 const toDate = (value: string): Date | null => {
@@ -249,6 +266,129 @@ export function rowToDataWipingData(row: CsvRow): DataWipingCsvData {
       n["desktopssdnotreceived"] ?? n["desktopnotwiped"] ?? ""
     ),
   };
+}
+
+export function rowToDataWipingMatrix(
+  headers: string[],
+  values: string[]
+): DataWipingCsvData {
+  const out: DataWipingCsvData = { status: "", sourcingDealNo: "" };
+
+  const setStr = (
+    key: "status" | "sourcingDealNo" | "pickup" | "dataWipingId",
+    value: string
+  ) => {
+    const v = (value ?? "").trim();
+    if (v) out[key] = v;
+  };
+  const setInt = (
+    key:
+      | "laptop"
+      | "desktop"
+      | "total"
+      | "laptopSsdHddReceived"
+      | "laptopWiped"
+      | "laptopShreddingDone"
+      | "laptopNotWiped"
+      | "desktopSsdHddReceived"
+      | "desktopWiped"
+      | "desktopShreddingDone"
+      | "desktopNotWiped",
+    value: string
+  ) => {
+    if (out[key] === undefined) out[key] = toInt(value ?? "");
+  };
+
+  let section: "laptop" | "desktop" | null = null;
+
+  headers.forEach((header, index) => {
+    const value = values[index] ?? "";
+    const h = normalizeHeader(header);
+
+    if (h === "laptop") {
+      section = "laptop";
+      setInt("laptop", value);
+      return;
+    }
+    if (h === "desktop") {
+      section = "desktop";
+      setInt("desktop", value);
+      return;
+    }
+
+    if (h === "status" || h === "datawipingstatus") {
+      setStr("status", value);
+      return;
+    }
+    if (h === "sourcingdealno") {
+      setStr("sourcingDealNo", value);
+      return;
+    }
+    if (h === "pickupnumber" || h === "pickup") {
+      setStr("pickup", value);
+      return;
+    }
+    if (h === "datawipingid") {
+      setStr("dataWipingId", value);
+      return;
+    }
+    if (h === "total") {
+      setInt("total", value);
+      return;
+    }
+
+    const isLaptopSection = section === "laptop";
+    const isDesktopSection = section === "desktop";
+
+    if (
+      h === "laptopssdhddreceived" ||
+      h === "laptopssdreceived" ||
+      (h === "ssdhddreceived" && isLaptopSection)
+    ) {
+      setInt("laptopSsdHddReceived", value);
+      return;
+    }
+    if (h === "laptopdatasanitized" || h === "laptopwiped") {
+      setInt("laptopWiped", value);
+      return;
+    }
+    if (
+      h === "laptopshreddingdone" ||
+      (h === "shreddingdone" && isLaptopSection)
+    ) {
+      setInt("laptopShreddingDone", value);
+      return;
+    }
+    if (h === "laptopssdnotreceived" || h === "laptopnotwiped") {
+      setInt("laptopNotWiped", value);
+      return;
+    }
+    if (
+      h === "desktopssdhddreceived" ||
+      h === "desktopssdreceived" ||
+      (h === "ssdhddreceived" && isDesktopSection)
+    ) {
+      setInt("desktopSsdHddReceived", value);
+      return;
+    }
+    if (h === "desktopdatasanitized" || h === "desktopwiped") {
+      setInt("desktopWiped", value);
+      return;
+    }
+    if (
+      h === "desktopshreddingdone" ||
+      (h === "shreddingdone" && isDesktopSection)
+    ) {
+      setInt("desktopShreddingDone", value);
+      return;
+    }
+    if (h === "desktopssdnotreceived" || h === "desktopnotwiped") {
+      setInt("desktopNotWiped", value);
+      return;
+    }
+  });
+
+  return out;
 }
 
 export type CertificateCsvData = {
