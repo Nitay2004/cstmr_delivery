@@ -142,18 +142,29 @@ export function DeviceDetailDialog({
     setError(null);
   };
 
-  const filtered =
-    typeof wiped === "string" &&
-    wiped !== "" &&
-    typeof hddAvailable === "string" &&
-    hddAvailable !== "";
+  const wipedFilter = typeof wiped === "string" && wiped !== "";
+  const hddFilter = typeof hddAvailable === "string" && hddAvailable !== "";
+  const filtered = wipedFilter || hddFilter;
+  const noun = wipedFilter
+    ? wiped.toLowerCase() === "yes"
+      ? "Data Sanitized"
+      : "Shredding Done"
+    : "details";
+  const extra =
+    wipedFilter && hddFilter
+      ? ` with Wiped = ${wiped} and HDD Available = ${hddAvailable}`
+      : wipedFilter
+        ? ` with Wiped = ${wiped}`
+        : hddFilter
+          ? ` with HDD Available = ${hddAvailable}`
+          : "";
   const title = filtered
-    ? `${deviceType} Data Sanitized — ${pickup || "Unknown Pickup"}`
+    ? `${deviceType} ${noun} — ${pickup || "Unknown Pickup"}`
     : `${deviceType} details — ${pickup || "Unknown Pickup"}`;
   const description = filtered
     ? `${total.toLocaleString("en-IN")} ${deviceType.toLowerCase()}${
         total === 1 ? "" : "s"
-      } wiped with HDD available for this pick up.`
+      }${extra} for this pick up.`
     : `${total.toLocaleString("en-IN")} ${deviceType.toLowerCase()}${
         total === 1 ? "" : "s"
       } for this pick up.`;

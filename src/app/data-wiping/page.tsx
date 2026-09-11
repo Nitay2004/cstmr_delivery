@@ -84,7 +84,8 @@ export default function DataWipingPage() {
   const [detail, setDetail] = useState<{
     pickup: string;
     deviceType: "Laptop" | "Desktop";
-    sanitized?: boolean;
+    wiped?: string;
+    hddAvailable?: string;
   } | null>(null);
 
   const openDetail = (pickup: string, deviceType: "Laptop" | "Desktop") => {
@@ -96,12 +97,12 @@ export default function DataWipingPage() {
     row: ModuleRow,
     deviceType: "Laptop" | "Desktop",
     valueKey: string,
-    sanitized?: boolean
+    filter?: { wiped?: string; hddAvailable?: string }
   ) => {
     const value = Number(row[valueKey] ?? 0);
     if (!value || value <= 0) return <span className="text-muted-foreground">—</span>;
-    const open = sanitized
-      ? () => setDetail({ pickup: String(row.pickup ?? ""), deviceType, sanitized: true })
+    const open = filter
+      ? () => setDetail({ pickup: String(row.pickup ?? ""), deviceType, ...filter })
       : () => openDetail(String(row.pickup ?? ""), deviceType);
     return (
       <button
@@ -109,8 +110,8 @@ export default function DataWipingPage() {
         onClick={open}
         className="font-medium text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
         title={
-          sanitized
-            ? `View ${deviceType} data sanitized for ${String(row.pickup ?? "")}`
+          filter
+            ? `View ${deviceType} ${valueKey.replace("laptop", "data").replace("desktop", "data")} for ${String(row.pickup ?? "")}`
             : `View ${deviceType} details for ${String(row.pickup ?? "")}`
         }
       >
@@ -135,9 +136,22 @@ export default function DataWipingPage() {
       key: "laptopWiped",
       label: "Laptop Data Sanitized",
       align: "right",
-      render: (row) => countLink(row, "Laptop", "laptopWiped", true),
+      render: (row) =>
+        countLink(row, "Laptop", "laptopWiped", {
+          wiped: "Yes",
+          hddAvailable: "Yes",
+        }),
     },
-    { key: "laptopShreddingDone", label: "Shredding Done", align: "right" },
+    {
+      key: "laptopShreddingDone",
+      label: "Shredding Done",
+      align: "right",
+      render: (row) =>
+        countLink(row, "Laptop", "laptopShreddingDone", {
+          wiped: "No",
+          hddAvailable: "Yes",
+        }),
+    },
     { key: "laptopNotWiped", label: "Laptop SSD Not Received", align: "right" },
     {
       key: "desktop",
@@ -150,9 +164,22 @@ export default function DataWipingPage() {
       key: "desktopWiped",
       label: "Desktop Data Sanitized",
       align: "right",
-      render: (row) => countLink(row, "Desktop", "desktopWiped", true),
+      render: (row) =>
+        countLink(row, "Desktop", "desktopWiped", {
+          wiped: "Yes",
+          hddAvailable: "Yes",
+        }),
     },
-    { key: "desktopShreddingDone", label: "Shredding Done", align: "right" },
+    {
+      key: "desktopShreddingDone",
+      label: "Shredding Done",
+      align: "right",
+      render: (row) =>
+        countLink(row, "Desktop", "desktopShreddingDone", {
+          wiped: "No",
+          hddAvailable: "Yes",
+        }),
+    },
     { key: "desktopNotWiped", label: "Desktop SSD Not Received", align: "right" },
   ];
 
@@ -205,8 +232,8 @@ export default function DataWipingPage() {
         }}
         pickup={detail?.pickup ?? ""}
         deviceType={detail?.deviceType ?? "Laptop"}
-        wiped={detail?.sanitized ? "Yes" : undefined}
-        hddAvailable={detail?.sanitized ? "Yes" : undefined}
+        wiped={detail?.wiped}
+        hddAvailable={detail?.hddAvailable}
       />
     </div>
   );
