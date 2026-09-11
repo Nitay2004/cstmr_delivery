@@ -152,7 +152,16 @@ export default function DataWipingPage() {
           hddAvailable: "Yes",
         }),
     },
-    { key: "laptopNotWiped", label: "Laptop SSD Not Received", align: "right" },
+    {
+      key: "laptopNotWiped",
+      label: "Laptop SSD Not Received",
+      align: "right",
+      render: (row) =>
+        countLink(row, "Laptop", "laptopNotWiped", {
+          wiped: "No",
+          hddAvailable: "No",
+        }),
+    },
     {
       key: "desktop",
       label: "Desktop",
@@ -180,7 +189,13 @@ export default function DataWipingPage() {
           hddAvailable: "Yes",
         }),
     },
-    { key: "desktopNotWiped", label: "Desktop SSD Not Received", align: "right" },
+    { key: "desktopNotWiped", label: "Desktop SSD Not Received", align: "right",
+      render: (row) =>
+        countLink(row, "Desktop", "desktopNotWiped", {
+          wiped: "No",
+          hddAvailable: "No",
+        }),
+    },
   ];
 
   return (
