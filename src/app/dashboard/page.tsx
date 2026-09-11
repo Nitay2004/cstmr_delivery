@@ -226,91 +226,93 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <Card className="shadow-sm border-border">
-        <CardHeader>
-          <CardTitle className="text-base">Category Wise Devices by Month</CardTitle>
-          <CardDescription>
-            Device breakdown by category across months.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={CATEGORY_DATA} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/50" />
-              <XAxis
-                dataKey="month"
-                tickLine={false}
-                axisLine={false}
-                tick={{ fontSize: 12 }}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                width={48}
-                tick={{ fontSize: 12 }}
-                tickFormatter={formatNumber}
-              />
-              <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--border)" }} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              {CATEGORY_COLORS.map((c) => (
-                <Bar
-                  key={c.key}
-                  dataKey={c.key}
-                  stackId="device"
-                  fill={c.fill}
-                  radius={[4, 4, 0, 0]}
-                  maxBarSize={56}
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <Card className="shadow-sm border-border">
+          <CardHeader>
+            <CardTitle className="text-base">Category Wise Devices by Month</CardTitle>
+            <CardDescription>
+              Device breakdown by category across months.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={360}>
+              <BarChart data={CATEGORY_DATA} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/50" />
+                <XAxis
+                  dataKey="month"
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 12 }}
                 />
-              ))}
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  width={48}
+                  tick={{ fontSize: 12 }}
+                  tickFormatter={formatNumber}
+                />
+                <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--border)" }} />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                {CATEGORY_COLORS.map((c) => (
+                  <Bar
+                    key={c.key}
+                    dataKey={c.key}
+                    stackId="device"
+                    fill={c.fill}
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={56}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-      <Card className="shadow-sm border-border">
-        <CardHeader>
-          <CardTitle className="text-base">Category Wise Devices by City</CardTitle>
-          <CardDescription>
-            Device breakdown by category across cities. Total:{" "}
-            {formatNumber(CITY_TOTAL)}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart
-              data={CATEGORY_BY_CITY}
-              margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/50" />
-              <XAxis
-                dataKey="city"
-                tickLine={false}
-                axisLine={false}
-                tick={{ fontSize: 12 }}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                width={48}
-                tick={{ fontSize: 12 }}
-                tickFormatter={formatNumber}
-              />
-              <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--border)" }} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              {CATEGORY_COLORS.map((c) => (
-                <Bar
-                  key={c.key}
-                  dataKey={c.key}
-                  stackId="city"
-                  fill={c.fill}
-                  radius={[4, 4, 0, 0]}
-                  maxBarSize={72}
+        <Card className="shadow-sm border-border">
+          <CardHeader>
+            <CardTitle className="text-base">Category Wise Devices by City</CardTitle>
+            <CardDescription>
+              Device breakdown by category across cities. Total:{" "}
+              {formatNumber(CITY_TOTAL)}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={360}>
+              <BarChart
+                data={CATEGORY_BY_CITY}
+                margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/50" />
+                <XAxis
+                  dataKey="city"
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 12 }}
                 />
-              ))}
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  width={48}
+                  tick={{ fontSize: 12 }}
+                  tickFormatter={formatNumber}
+                />
+                <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--border)" }} />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                {CATEGORY_COLORS.map((c) => (
+                  <Bar
+                    key={c.key}
+                    dataKey={c.key}
+                    stackId="city"
+                    fill={c.fill}
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={72}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
