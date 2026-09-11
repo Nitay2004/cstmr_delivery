@@ -2,9 +2,13 @@
  * Bulk link Data Wiping Master PDFs.
  *
  * Scans a folder for PDF files and links each one to an asset in
- * DataWipingMaster by matching the filename (without extension) against
- * `serialNumber`, then falling back to `pdfName`. Writes the relative path
- * into `storagePath` so the app can serve the file from the server disk.
+ * DataWipingMaster by matching the serial. Certificate filenames look like
+ * `II556-<serial>.pdf` (or bare `<pickup>-<serial>.pdf` like `241-<serial>.pdf`),
+ * so the `II\d+-`/`\d{2,4}-` prefix is stripped before matching against
+ * `serialNumber`. Falls back to matching the full filename (with and without
+ * extension) against `pdfName`. Writes the relative path into `storagePath`
+ * and the actual filename into `pdfName` so the app can serve the file from
+ * the server disk.
  *
  * Usage (run inside the repo, with DATABASE_URL pointing to the office DB):
  *   npx tsx scripts/link-master-pdfs.ts --root /opt/dwmp-pdfs [--dry-run]
@@ -13,6 +17,10 @@ import { promises as fs } from "fs";
 import path from "path";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+
+function stripSerialPrefix(nameNoExt: string): string {
+  return nameNoExt.replace(/^(?:II)?\d{2,4}-/i, "");
+}
 
 function arg(name: string): string | undefined {
   const idx = process.argv.indexOf(name);
@@ -80,10 +88,11 @@ async function main() {
     for (const file of files) {
       const basename = path.basename(file);
       const nameNoExt = basename.replace(/\.pdf$/i, "");
+      const stripped = stripSerialPrefix(nameNoExt);
       const rel = path.relative(resolvedRoot, file).split(path.sep).join("/");
 
       const id =
-        bySerial.get(nameNoExt.toLowerCase()) ??
+        bySerial.get(stripped.toLowerCase()) ??
         byPdfName.get(basename.toLowerCase()) ??
         byPdfName.get(nameNoExt.toLowerCase());
 
@@ -93,7 +102,7 @@ async function main() {
       }
       matched++;
 
-      if (bySerialExisting.get(nameNoExt.toLowerCase()) === rel) {
+      if (bySerialExisting.get(stripped.toLowerCase()) === rel) {
         alreadyLinked++;
         continue;
       }
