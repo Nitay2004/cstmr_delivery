@@ -344,10 +344,7 @@ export function DataWipingMasterTable() {
                           {display(r.pdfName)}
                         </a>
                       ) : (
-                        <span className="flex max-w-56 items-center gap-1.5 truncate text-muted-foreground">
-                          <FileText className="size-4 shrink-0 opacity-50" />
-                          {display(r.pdfName)}
-                        </span>
+                        <span className="text-muted-foreground">—</span>
                       )
                     ) : (
                       display(r[col.key])

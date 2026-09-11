@@ -206,24 +206,21 @@ export function DeviceDetailDialog({
                               : "whitespace-nowrap"
                           }
                         >
-                          {col.key === "pdfName" ? (
-                            r.storagePath ? (
-                              <a
-                                href={`/api/data-wiping-master/file?assetId=${r.id}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex max-w-40 items-center gap-1.5 truncate font-medium text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
-                                title="Open PDF"
-                              >
-                                <FileText className="size-4 shrink-0" />
-                                {display(r.pdfName)}
-                              </a>
-                            ) : (
-                              <span className="flex max-w-40 items-center gap-1.5 truncate text-muted-foreground">
-                                <FileText className="size-4 shrink-0 opacity-50" />
-                                {display(r.pdfName)}
-                              </span>
-                            )
+                            {col.key === "pdfName" ? (
+                             r.storagePath ? (
+                               <a
+                                 href={`/api/data-wiping-master/file?assetId=${r.id}`}
+                                 target="_blank"
+                                 rel="noreferrer"
+                                 className="inline-flex max-w-56 items-center gap-1.5 truncate font-medium text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
+                                 title="Open PDF"
+                               >
+                                 <FileText className="size-4 shrink-0" />
+                                 {display(r.pdfName)}
+                               </a>
+                             ) : (
+                               <span className="text-muted-foreground">—</span>
+                             )
                           ) : (
                             display(r[col.key])
                           )}
