@@ -13,8 +13,10 @@ services:
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
       SUPABASE_STORAGE_BUCKET: ${SUPABASE_STORAGE_BUCKET}
+      DATA_WIPING_MASTER_PDF_ROOT: ${DATA_WIPING_MASTER_PDF_ROOT}
     volumes:
       - portal-uploads:/app/public/uploads
+      - /opt/dwmp-pdfs:/app/dwmp-pdfs
 
 volumes:
   portal-uploads:
