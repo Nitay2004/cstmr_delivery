@@ -46,6 +46,47 @@ const CATEGORY_DATA = [
   { month: "Aug/26", Laptop: 689, Desktop: 5, "TFT / Monitor": 305, "IP Phones": 0, Others: 70 },
 ];
 
+const CATEGORY_BY_CITY = [
+  {
+    city: "Bangalore",
+    Laptop: 267,
+    Desktop: 0,
+    "TFT / Monitor": 0,
+    "IP Phones": 846,
+    Others: 17,
+  },
+  {
+    city: "Hyderabad",
+    Laptop: 3968,
+    Desktop: 5,
+    "TFT / Monitor": 1100,
+    "IP Phones": 5285,
+    Others: 0,
+  },
+  {
+    city: "Noida",
+    Laptop: 3667,
+    Desktop: 227,
+    "TFT / Monitor": 1649,
+    "IP Phones": 3112,
+    Others: 398,
+  },
+  {
+    city: "Gurgaon",
+    Laptop: 4071,
+    Desktop: 1524,
+    "TFT / Monitor": 0,
+    "IP Phones": 1014,
+    Others: 0,
+  },
+];
+
+const CITY_TOTAL = CATEGORY_BY_CITY.reduce(
+  (acc, row) =>
+    acc + row.Laptop + row.Desktop + row["TFT / Monitor"] + row["IP Phones"] + row.Others,
+  0
+);
+
 const CATEGORY_COLORS: { key: string; fill: string }[] = [
   { key: "Laptop", fill: "var(--chart-1)" },
   { key: "Desktop", fill: "var(--chart-2)" },
@@ -219,6 +260,51 @@ export default function DashboardPage() {
                   fill={c.fill}
                   radius={[4, 4, 0, 0]}
                   maxBarSize={56}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-sm border-border">
+        <CardHeader>
+          <CardTitle className="text-base">Category Wise Devices by City</CardTitle>
+          <CardDescription>
+            Device breakdown by category across cities. Total:{" "}
+            {formatNumber(CITY_TOTAL)}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart
+              data={CATEGORY_BY_CITY}
+              margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/50" />
+              <XAxis
+                dataKey="city"
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 12 }}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                width={48}
+                tick={{ fontSize: 12 }}
+                tickFormatter={formatNumber}
+              />
+              <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--border)" }} />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              {CATEGORY_COLORS.map((c) => (
+                <Bar
+                  key={c.key}
+                  dataKey={c.key}
+                  stackId="city"
+                  fill={c.fill}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={72}
                 />
               ))}
             </BarChart>
