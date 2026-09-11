@@ -9,8 +9,12 @@ const SEARCH_FIELDS = [
   "serialNumber",
   "assetType",
   "hddSerialNumber",
-  "uuid",
+  "wiped",
+  "wipedSoftware",
+  "wipedDate",
+  "hddAvailable",
   "size",
+  "remarks",
   "pdfName",
 ] as const;
 
@@ -92,9 +96,12 @@ export async function POST(request: NextRequest) {
       serialNumber: str(body.serialNumber),
       assetType: str(body.assetType),
       hddSerialNumber: str(body.hddSerialNumber),
-      dataWipingDate: str(body.dataWipingDate),
-      uuid: str(body.uuid),
+      wiped: str(body.wiped),
+      wipedSoftware: str(body.wipedSoftware),
+      wipedDate: str(body.wipedDate),
+      hddAvailable: str(body.hddAvailable),
       size: str(body.size),
+      remarks: str(body.remarks),
       pdfName: str(body.pdfName),
     },
   });

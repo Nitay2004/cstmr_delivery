@@ -19,6 +19,7 @@ import {
 import {
   AlertCircle,
   AlertTriangle,
+  FileText,
   Inbox,
   Loader2,
   Pencil,
@@ -45,19 +46,23 @@ interface Item {
   serialNumber?: string | null;
   assetType?: string | null;
   hddSerialNumber?: string | null;
-  dataWipingDate?: string | null;
-  uuid?: string | null;
+  wiped?: string | null;
+  wipedSoftware?: string | null;
+  wipedDate?: string | null;
+  hddAvailable?: string | null;
   size?: string | null;
+  remarks?: string | null;
   pdfName?: string | null;
+  storagePath?: string | null;
 }
 
 const API_PATH = "/api/data-wiping-master";
 
 const formFields: FormField[] = [
-  { key: "pickupId", label: "Pickup ID", placeholder: "e.g. PU-1001" },
+  { key: "pickupId", label: "Pickup ID / Lot No.", placeholder: "e.g. PICK-2026-000241" },
   {
     key: "serialNumber",
-    label: "Serial number/Asset Tag",
+    label: "Manufacturer Serial Number",
     required: true,
     placeholder: "e.g. XYZ12345",
   },
@@ -67,20 +72,26 @@ const formFields: FormField[] = [
     label: "HDD Serial Number",
     placeholder: "e.g. SN-0001",
   },
-  { key: "dataWipingDate", label: "Data Wiping Date", inputType: "date" },
-  { key: "uuid", label: "UUID", placeholder: "e.g. 550e8400-e29b-41d4" },
+  { key: "wiped", label: "Wiped", placeholder: "e.g. Yes / No" },
+  { key: "wipedSoftware", label: "Wiped Software", placeholder: "e.g. KillDisk" },
+  { key: "wipedDate", label: "Wiped Date", placeholder: "e.g. 2026-09-10" },
+  { key: "hddAvailable", label: "HDD Available", placeholder: "e.g. Yes / No" },
   { key: "size", label: "Size", placeholder: "e.g. 256GB" },
+  { key: "remarks", label: "Remarks" },
   { key: "pdfName", label: "PDF Name" },
 ];
 
 const CELL_RENDER: { key: keyof Item; label: string }[] = [
-  { key: "pickupId", label: "Pickup ID" },
-  { key: "serialNumber", label: "Serial number/Asset Tag" },
+  { key: "pickupId", label: "Pickup ID / Lot No." },
+  { key: "serialNumber", label: "Manufacturer Serial Number" },
   { key: "assetType", label: "Asset Type" },
   { key: "hddSerialNumber", label: "HDD Serial Number" },
-  { key: "dataWipingDate", label: "Data Wiping Date" },
-  { key: "uuid", label: "UUID" },
+  { key: "wiped", label: "Wiped" },
+  { key: "wipedSoftware", label: "Wiped Software" },
+  { key: "wipedDate", label: "Wiped Date" },
+  { key: "hddAvailable", label: "HDD Available" },
   { key: "size", label: "Size" },
+  { key: "remarks", label: "Remarks" },
   { key: "pdfName", label: "PDF Name" },
 ];
 
@@ -320,7 +331,27 @@ export function DataWipingMasterTable() {
                         : undefined
                     }
                   >
-                    {display(r[col.key])}
+                    {col.key === "pdfName" ? (
+                      r.storagePath ? (
+                        <a
+                          href={`/api/data-wiping-master/file?assetId=${r.id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex max-w-56 items-center gap-1.5 truncate font-medium text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
+                          title="Open PDF"
+                        >
+                          <FileText className="size-4 shrink-0" />
+                          {display(r.pdfName)}
+                        </a>
+                      ) : (
+                        <span className="flex max-w-56 items-center gap-1.5 truncate text-muted-foreground">
+                          <FileText className="size-4 shrink-0 opacity-50" />
+                          {display(r.pdfName)}
+                        </span>
+                      )
+                    ) : (
+                      display(r[col.key])
+                    )}
                   </TableCell>
                 ))}
                 <TableCell className="text-right">

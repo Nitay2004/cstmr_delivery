@@ -451,9 +451,12 @@ export type DataWipingMasterCsvData = {
   serialNumber?: string;
   assetType?: string;
   hddSerialNumber?: string;
-  dataWipingDate?: string;
-  uuid?: string;
+  wiped?: string;
+  wipedSoftware?: string;
+  wipedDate?: string;
+  hddAvailable?: string;
   size?: string;
+  remarks?: string;
   pdfName?: string;
 };
 
@@ -464,12 +467,16 @@ export function rowToDataWipingMasterData(
   return {
     pickupId: n["pickupid"] ?? n["pickupnumber"] ?? undefined,
     serialNumber:
-      n["serialnumber"] ?? (n["assetag"] || n["serialnumberassettag"] || undefined),
+      n["manufacturerserialnumber"] ??
+      (n["manufacturerserialno"] ?? (n["serialnumber"] || n["assetag"] || undefined)),
     assetType: n["assettype"] || undefined,
     hddSerialNumber: n["hddserialnumber"] || undefined,
-    dataWipingDate: n["datawipingdate"] || undefined,
-    uuid: n["uuid"] || undefined,
+    wiped: n["wiped"] || undefined,
+    wipedSoftware: n["wipedsoftware"] || undefined,
+    wipedDate: n["wipeddate"] || undefined,
+    hddAvailable: n["hddavailable"] || undefined,
     size: n["size"] || undefined,
+    remarks: n["remarks"] || undefined,
     pdfName: n["pdfname"] || undefined,
   };
 }

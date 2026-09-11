@@ -11,9 +11,12 @@ const FIELDS = [
   "serialNumber",
   "assetType",
   "hddSerialNumber",
-  "dataWipingDate",
-  "uuid",
+  "wiped",
+  "wipedSoftware",
+  "wipedDate",
+  "hddAvailable",
   "size",
+  "remarks",
   "pdfName",
 ] as const;
 

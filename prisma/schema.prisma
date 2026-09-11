@@ -208,10 +208,14 @@ model DataWipingMaster {
   serialNumber      String?
   assetType         String?
   hddSerialNumber   String?
-  dataWipingDate    String?
-  uuid              String?
+  wiped             String?
+  wipedSoftware     String?
+  wipedDate         String?
+  hddAvailable      String?
   size              String?
+  remarks           String?
   pdfName           String?
+  storagePath       String?
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
@@ -219,7 +223,6 @@ model DataWipingMaster {
   @@index([serialNumber])
   @@index([assetType])
   @@index([hddSerialNumber])
-  @@index([uuid])
 }
 
 model Certificate {

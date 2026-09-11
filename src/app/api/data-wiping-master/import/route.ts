@@ -73,9 +73,12 @@ export async function POST(request: NextRequest) {
       serialNumber: data.serialNumber,
       assetType: data.assetType,
       hddSerialNumber: data.hddSerialNumber,
-      dataWipingDate: data.dataWipingDate,
-      uuid: data.uuid,
+      wiped: data.wiped,
+      wipedSoftware: data.wipedSoftware,
+      wipedDate: data.wipedDate,
+      hddAvailable: data.hddAvailable,
       size: data.size,
+      remarks: data.remarks,
       pdfName: data.pdfName,
     });
   });
