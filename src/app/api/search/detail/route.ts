@@ -10,6 +10,7 @@ const TYPE_PERMISSION: Record<string, string> = {
   po: "viewPurchaseOrders",
   payment: "viewPayments",
   dataWiping: "viewDataWiping",
+  device: "viewDataWipingMaster",
   certificate: "viewCertificate",
   grn: "viewGrn",
   consolidated: "viewConsolidated",
@@ -25,6 +26,7 @@ const TYPE_MODEL: Record<
   po: prisma.purchaseOrder,
   payment: prisma.payment,
   dataWiping: prisma.dataWiping,
+  device: prisma.dataWipingMaster,
   certificate: prisma.certificate,
   grn: prisma.grn,
   consolidated: prisma.consolidated,
@@ -61,6 +63,60 @@ export async function GET(request: NextRequest) {
   const record = await model.findUnique({ where: { id } });
   if (!record) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  if (type === "device") {
+    const device = record as {
+      id: string;
+      pickupId?: string | null;
+      serialNumber?: string | null;
+      assetType?: string | null;
+      hddSerialNumber?: string | null;
+      wiped?: string | null;
+      hddAvailable?: string | null;
+      [key: string]: unknown;
+    };
+    const pickupRef = device.pickupId ?? "";
+    const [pickupRequest, wipingRecord, quote, po, payment, certificate, grn] =
+      await Promise.all([
+        pickupRef
+          ? prisma.pickupRequest.findFirst({
+              where: { OR: [{ pickup: pickupRef }, { id: pickupRef }] },
+            })
+          : null,
+        pickupRef
+          ? prisma.dataWiping.findFirst({
+              where: { pickup: pickupRef },
+            })
+          : null,
+        pickupRef
+          ? prisma.quote.findFirst({ where: { pickup: pickupRef } })
+          : null,
+        pickupRef
+          ? prisma.purchaseOrder.findFirst({ where: { pickup: pickupRef } })
+          : null,
+        pickupRef
+          ? prisma.payment.findFirst({ where: { pickup: pickupRef } })
+          : null,
+        pickupRef
+          ? prisma.certificate.findFirst({ where: { pickup: pickupRef } })
+          : null,
+        pickupRef
+          ? prisma.grn.findFirst({ where: { pickup: pickupRef } })
+          : null,
+      ]);
+    return NextResponse.json({
+      record,
+      related: {
+        pickupRequest: pickupRequest ?? null,
+        dataWiping: wipingRecord ?? null,
+        quote: quote ?? null,
+        po: po ?? null,
+        payment: payment ?? null,
+        certificate: certificate ?? null,
+        grn: grn ?? null,
+      },
+    });
   }
 
   return NextResponse.json({ record });

@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { RotateCcw, Workflow, CheckCircle2, Laptop, HardDrive, XCircle, Scissors, Loader2, type LucideIcon } from "lucide-react";
+import { RotateCcw, Workflow, CheckCircle2, Laptop, HardDrive, XCircle, Scissors, Loader2, Clock, type LucideIcon } from "lucide-react";
 
 export const DATA_WIPING_STAGES = [
   "Data Wiping Created",
@@ -51,11 +51,13 @@ interface SumCardDef {
     | "laptopSsdHddReceived"
     | "laptopNotWiped"
     | "laptopWiped"
+    | "laptopPending"
     | "laptopShreddingDone"
     | "desktop"
     | "desktopSsdHddReceived"
     | "desktopNotWiped"
     | "desktopWiped"
+    | "desktopPending"
     | "desktopShreddingDone";
   label: string;
   icon: LucideIcon;
@@ -86,6 +88,12 @@ const SUM_CARD_DEFS: SumCardDef[] = [
     label: "Data Sanitization Done",
     icon: CheckCircle2,
     iconClass: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  },
+  {
+    key: "laptopPending",
+    label: "Data Sanitization Pending",
+    icon: Clock,
+    iconClass: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   },
   {
     key: "laptopShreddingDone",
@@ -119,6 +127,12 @@ const DESKTOP_SUM_CARD_DEFS: SumCardDef[] = [
     label: "Data Sanitization Done",
     icon: CheckCircle2,
     iconClass: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  },
+  {
+    key: "desktopPending",
+    label: "Data Sanitization Pending",
+    icon: Clock,
+    iconClass: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   },
   {
     key: "desktopShreddingDone",
@@ -161,9 +175,24 @@ export function DataWipingStatCards() {
 
   useEffect(() => {
     let active = true;
-    fetch("/api/data-wiping")
-      .then((res) => res.json())
-      .then((data) => {
+    const masterParams = (assetType: string) =>
+      new URLSearchParams({
+        page: "1",
+        pageSize: "1",
+        assetType,
+        wiped: "pending",
+        hddAvailable: "Yes",
+      });
+    Promise.all([
+      fetch("/api/data-wiping").then((res) => res.json()),
+      fetch(
+        `/api/data-wiping-master?${masterParams("Laptop").toString()}`
+      ).then((res) => res.json()),
+      fetch(
+        `/api/data-wiping-master?${masterParams("Desktop").toString()}`
+      ).then((res) => res.json()),
+    ])
+      .then(([data, laptopData, desktopData]) => {
         if (!active) return;
         const list: Record<string, unknown>[] =
           data.dataWipings ?? data.rows ?? data.items ?? [];
@@ -175,11 +204,13 @@ export function DataWipingStatCards() {
             laptopSsdHddReceived: sumBy(list, "laptopSsdHddReceived"),
             laptopNotWiped: sumBy(list, "laptopNotWiped"),
             laptopWiped: sumBy(list, "laptopWiped"),
+            laptopPending: Number(laptopData.total ?? 0),
             laptopShreddingDone: sumBy(list, "laptopShreddingDone"),
             desktop: sumBy(list, "desktop"),
             desktopSsdHddReceived: sumBy(list, "desktopSsdHddReceived"),
             desktopNotWiped: sumBy(list, "desktopNotWiped"),
             desktopWiped: sumBy(list, "desktopWiped"),
+            desktopPending: Number(desktopData.total ?? 0),
             desktopShreddingDone: sumBy(list, "desktopShreddingDone"),
           },
         });
@@ -200,7 +231,7 @@ export function DataWipingStatCards() {
 
   return (
     <div className="flex flex-col gap-4">
-<div className="grid grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+<div className="grid grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         {SUM_CARD_DEFS.map((def) => {
           const Icon = def.icon;
           return (
@@ -224,7 +255,7 @@ export function DataWipingStatCards() {
           );
         })}
       </div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         {DESKTOP_SUM_CARD_DEFS.map((def) => {
           const Icon = def.icon;
           return (

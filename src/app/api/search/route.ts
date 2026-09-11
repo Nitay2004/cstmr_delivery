@@ -179,6 +179,32 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  if (user.permissions.viewDataWiping || user.permissions.viewDataWipingMaster) {
+    const rows = await prisma.dataWipingMaster.findMany({
+      where: {
+        OR: [
+          { serialNumber: contains },
+          { hddSerialNumber: contains },
+          { pickupId: contains },
+        ],
+      },
+      orderBy: { updatedAt: "desc" },
+      take: PER_MODULE_LIMIT,
+    });
+    for (const r of rows) {
+      add(
+        "device",
+        "Asset / Serial No.",
+        r.serialNumber || r.hddSerialNumber || r.id,
+        [r.assetType, r.pickupId, r.wiped]
+          .filter(Boolean)
+          .join(" • ") || r.id,
+        "/data-wiping-master",
+        r.id
+      );
+    }
+  }
+
   if (user.permissions.viewCertificate) {
     const rows = await prisma.certificate.findMany({
       where: {

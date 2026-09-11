@@ -57,7 +57,10 @@ export async function GET(request: NextRequest) {
     where.assetType = { equals: assetType, mode: "insensitive" as const };
   }
   if (wiped !== "") {
-    where.wiped = { equals: wiped, mode: "insensitive" as const };
+    where.wiped =
+      wiped.toLowerCase() === "pending"
+        ? { notIn: ["Yes", "No"] }
+        : { equals: wiped, mode: "insensitive" as const };
   }
   if (hddAvailable !== "") {
     where.hddAvailable = { equals: hddAvailable, mode: "insensitive" as const };

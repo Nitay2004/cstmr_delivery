@@ -8,6 +8,7 @@ import {
   BadgeCheck,
   ClipboardList,
   CreditCard,
+  Cpu,
   FileSignature,
   FileText,
   HardDrive,
@@ -35,6 +36,7 @@ const typeIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   po: FileSignature,
   payment: CreditCard,
   dataWiping: HardDrive,
+  device: Cpu,
   certificate: BadgeCheck,
   grn: ClipboardList,
   consolidated: LayoutGrid,
@@ -132,6 +134,19 @@ const FIELD_CONFIG: Record<string, FieldDef[]> = {
     },
     { key: "desktopNotWiped", label: "Desktop Not Wiped", format: "number" },
   ],
+  device: [
+    { key: "serialNumber", label: "Manufacturer Serial Number" },
+    { key: "assetType", label: "Asset Type" },
+    { key: "pickupId", label: "Pickup ID / Lot No." },
+    { key: "hddSerialNumber", label: "HDD Serial Number" },
+    { key: "hddAvailable", label: "HDD Available" },
+    { key: "wiped", label: "Wiped" },
+    { key: "wipedSoftware", label: "Wiped Software" },
+    { key: "wipedDate", label: "Wiped Date" },
+    { key: "size", label: "Size" },
+    { key: "remarks", label: "Remarks" },
+    { key: "pdfName", label: "PDF Name" },
+  ],
   certificate: [
     { key: "status", label: "Status", format: "badge" },
     { key: "sourcingDealNo", label: "Sourcing Deal No." },
@@ -160,7 +175,102 @@ const FIELD_CONFIG: Record<string, FieldDef[]> = {
   ],
 };
 
-function isEmpty(value: unknown): boolean {
+interface RelatedConfig {
+  title: string;
+  fields: FieldDef[];
+}
+
+const RELATED_CONFIG: Record<string, RelatedConfig> = {
+  pickupRequest: {
+    title: "Pickup Request",
+    fields: [
+      { key: "stage", label: "Stage", format: "badge" },
+      { key: "sourcingDealNo", label: "Sourcing Deal No." },
+      { key: "pickup", label: "Pickup" },
+      { key: "location", label: "Location" },
+      ...PICKUP_DEVICE_FIELDS.map((f) => ({
+        key: f.key,
+        label: f.label,
+        format: "number" as const,
+      })),
+    ],
+  },
+  dataWiping: {
+    title: "Data Wiping",
+    fields: [
+      { key: "status", label: "Status", format: "badge" },
+      { key: "sourcingDealNo", label: "Sourcing Deal No." },
+      { key: "pickup", label: "Pickup" },
+      { key: "dataWipingId", label: "Data Wiping ID" },
+      { key: "laptop", label: "Laptop", format: "number" },
+      { key: "desktop", label: "Desktop", format: "number" },
+      { key: "total", label: "Total", format: "number" },
+    ],
+  },
+  quote: {
+    title: "Quote",
+    fields: [
+      { key: "stage", label: "Stage", format: "badge" },
+      { key: "sourcingDealNo", label: "Sourcing Deal No." },
+      { key: "pickup", label: "Pickup" },
+      { key: "quoteNo", label: "Quote No." },
+      { key: "totalAmount", label: "Total Amount", format: "amount" },
+      { key: "locationCode", label: "Location Code" },
+    ],
+  },
+  po: {
+    title: "Purchase Order",
+    fields: [
+      { key: "stage", label: "Stage", format: "badge" },
+      { key: "sourcingDealNo", label: "Sourcing Deal No." },
+      { key: "pickup", label: "Pickup" },
+      { key: "quoteNo", label: "Quote No." },
+      { key: "purchaseOrderNo", label: "Purchase Order No." },
+      { key: "locationCode", label: "Location Code" },
+    ],
+  },
+  payment: {
+    title: "Payment",
+    fields: [
+      { key: "stage", label: "Stage", format: "badge" },
+      { key: "sourcingDealNo", label: "Sourcing Deal No." },
+      { key: "pickup", label: "Pickup" },
+      { key: "purchaseOrderNo", label: "Purchase Order No." },
+      { key: "payment", label: "Payment" },
+      {
+        key: "totalInvoiceAmount",
+        label: "Total Invoice Amount",
+        format: "amount",
+      },
+      {
+        key: "totalPaymentDone",
+        label: "Total Payment Done",
+        format: "amount",
+      },
+      { key: "balanceAmount", label: "Balance Amount", format: "amount" },
+    ],
+  },
+  certificate: {
+    title: "Certificate",
+    fields: [
+      { key: "status", label: "Status", format: "badge" },
+      { key: "sourcingDealNo", label: "Sourcing Deal No." },
+      { key: "pickup", label: "Pickup" },
+    ],
+  },
+  grn: {
+    title: "Chain of Custody / GRN",
+    fields: [
+      { key: "stage", label: "Stage", format: "badge" },
+      { key: "sourcingDealNo", label: "Sourcing Deal No." },
+      { key: "pickup", label: "Pickup" },
+      { key: "grnDetails", label: "GRN Details" },
+      { key: "invoiceNumber", label: "Invoice Number" },
+      { key: "invoiceDate", label: "Invoice Date" },
+    ],
+  },
+};
+  function isEmpty(value: unknown): boolean {
   return (
     value === null ||
     value === undefined ||
@@ -228,6 +338,9 @@ function ResultBody({
   const [record, setRecord] = React.useState<Record<string, unknown> | null>(
     null
   );
+  const [related, setRelated] = React.useState<Record<string, unknown> | null>(
+    null
+  );
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -243,6 +356,7 @@ function ResultBody({
         if (!active) return;
         if (data.record) setRecord(data.record);
         else setError(data.error ?? "Failed to load record");
+        if (data.related) setRelated(data.related);
       })
       .catch(() => {
         if (active) setError("Failed to load record");
@@ -257,6 +371,13 @@ function ResultBody({
 
   const IconComponent = typeIcons[result.type] ?? PackageOpen;
   const fields = FIELD_CONFIG[result.type] ?? [];
+
+  const relatedEntries =
+    result.type === "device" && related
+      ? (Object.entries(RELATED_CONFIG).filter(
+          ([key]) => Boolean(related[key])
+        ) as [string, RelatedConfig][])
+      : [];
 
   return (
     <>
@@ -286,15 +407,54 @@ function ResultBody({
             <span>{error}</span>
           </div>
         ) : (
-          <div className="divide-y divide-border/60 py-1">
-            {fields.map((field) => (
-              <FieldRow
-                key={field.key}
-                label={field.label}
-                value={record?.[field.key]}
-                format={field.format}
-              />
-            ))}
+          <div className="flex flex-col gap-3 py-1">
+            <div className="divide-y divide-border/60">
+              {fields.map((field) => (
+                <FieldRow
+                  key={field.key}
+                  label={field.label}
+                  value={record?.[field.key]}
+                  format={field.format}
+                />
+              ))}
+            </div>
+
+            {relatedEntries.length > 0 && (
+              <div className="mt-4">
+                <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Related Records
+                </div>
+                <div className="flex flex-col gap-3">
+                  {relatedEntries.map(([key, config]) => {
+                    const relatedRecord = related?.[key] as
+                      | Record<string, unknown>
+                      | null
+                      | undefined;
+                    if (!relatedRecord) return null;
+                    return (
+                      <div
+                        key={key}
+                        className="rounded-lg border border-border/60"
+                      >
+                        <div className="border-b border-border/50 bg-muted/30 px-3 py-1.5 text-xs font-medium text-foreground">
+                          {config.title}
+                        </div>
+                        <div className="divide-y divide-border/60">
+                          {config.fields.map((field) => (
+                            <FieldRow
+                              key={field.key}
+                              label={field.label}
+                              value={relatedRecord[field.key]}
+                              format={field.format}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
