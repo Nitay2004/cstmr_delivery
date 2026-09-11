@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ModuleTable } from "@/components/module-table";
 import { ModuleBulkUpload } from "@/components/module-bulk-upload";
 import { DataWipingStatCards, DATA_WIPING_STAGES } from "@/components/data-wiping-stat-cards";
-import { DeviceDetailSheet } from "@/components/device-detail-sheet";
+import { DeviceDetailDialog } from "@/components/device-detail-dialog";
 import { useUser, can } from "@/components/user-provider";
 import type { TableColumn, FormField, ModuleRow } from "@/lib/module-config";
 
@@ -175,7 +175,7 @@ export default function DataWipingPage() {
         attach={{ module: "data-wiping", title: "Data Wiping" }}
       />
 
-      <DeviceDetailSheet
+      <DeviceDetailDialog
         open={detail !== null}
         onOpenChange={(open) => {
           if (!open) setDetail(null);

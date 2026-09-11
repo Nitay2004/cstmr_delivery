@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -55,7 +55,7 @@ interface Props {
   deviceType: "Laptop" | "Desktop";
 }
 
-export function DeviceDetailSheet({
+export function DeviceDetailDialog({
   open,
   onOpenChange,
   pickup,
@@ -130,20 +130,20 @@ export function DeviceDetailSheet({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" showCloseButton className="w-full sm:max-w-3xl">
-        <SheetHeader>
-          <SheetTitle>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
             {deviceType} details — {pickup || "Unknown Pickup"}
-          </SheetTitle>
-          <SheetDescription>
+          </DialogTitle>
+          <DialogDescription>
             {total.toLocaleString("en-IN")} {deviceType.toLowerCase()}
             {total === 1 ? "" : "s"} for this pick up.
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
 
-        <div className="flex flex-1 flex-col gap-3 overflow-auto px-4 pb-4">
-          <div className="overflow-x-auto rounded-lg border">
+        <div className="flex min-h-0 flex-1 flex-col gap-3">
+          <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-lg border">
             <Table>
               <TableHeader className="bg-muted/30">
                 <TableRow>
@@ -209,51 +209,53 @@ export function DeviceDetailSheet({
             </Table>
           </div>
 
-          {total > 0 && (
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <span>
-                  Showing {(currentPage - 1) * pageSize + 1}–
-                  {Math.min(currentPage * pageSize, total)} of{" "}
-                  {total.toLocaleString("en-IN")}
-                </span>
-                <select
-                  value={pageSize}
-                  onChange={(e) => changePageSize(Number(e.target.value))}
-                  className="rounded-md border bg-transparent px-2 py-1 text-sm"
-                >
-                  {[5, 10, 20, 50].map((n) => (
-                    <option key={n} value={n}>
-                      {n} / page
-                    </option>
-                  ))}
-                </select>
+          <div className="shrink-0">
+            {total > 0 && (
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <span>
+                    Showing {(currentPage - 1) * pageSize + 1}–
+                    {Math.min(currentPage * pageSize, total)} of{" "}
+                    {total.toLocaleString("en-IN")}
+                  </span>
+                  <select
+                    value={pageSize}
+                    onChange={(e) => changePageSize(Number(e.target.value))}
+                    className="rounded-md border bg-transparent px-2 py-1 text-sm"
+                  >
+                    {[5, 10, 20, 50].map((n) => (
+                      <option key={n} value={n}>
+                        {n} / page
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    disabled={currentPage <= 1}
+                    onClick={() => goToPage(Math.max(1, currentPage - 1))}
+                  >
+                    ←
+                  </Button>
+                  <span className="px-2 text-sm text-muted-foreground">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    disabled={currentPage >= totalPages}
+                    onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
+                  >
+                    →
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="icon-sm"
-                  disabled={currentPage <= 1}
-                  onClick={() => goToPage(Math.max(1, currentPage - 1))}
-                >
-                  ←
-                </Button>
-                <span className="px-2 text-sm text-muted-foreground">
-                  {currentPage} / {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon-sm"
-                  disabled={currentPage >= totalPages}
-                  onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
-                >
-                  →
-                </Button>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
