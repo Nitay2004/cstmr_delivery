@@ -6,21 +6,68 @@ export type ParsedSheet = {
   headers: string[];
 };
 
+function normalizeKey(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[^a-z0-9]/g, "");
+}
+
 function normalizeValue(value: unknown): string {
   if (value === null || value === undefined) return "";
   if (value instanceof Date) {
     return isNaN(value.getTime()) ? "" : value.toISOString().split("T")[0];
   }
-  if (typeof value === "number") return String(value);
+  if (typeof value === "number") {
+    if (value >= 20000 && value <= 100000) {
+      const parsed = XLSX.SSF.parse_date_code(value);
+      if (parsed) {
+        return `${parsed.y}-${String(parsed.m).padStart(2, "0")}-${String(
+          parsed.d
+        ).padStart(2, "0")}`;
+      }
+    }
+    return String(value);
+  }
   return String(value).trim();
+}
+
+function scoreSheetKeys(keys: string[]): number {
+  const set = new Set(keys.map(normalizeKey));
+  let score = 0;
+  if (set.has("serialnumber")) score += 4;
+  if (set.has("pickupnumber") || set.has("pickupid")) score += 2;
+  if (set.has("assettype")) score += 1;
+  return score;
+}
+
+function pickBestSheet(
+  workbook: XLSX.WorkBook
+): { sheet: XLSX.WorkSheet; score: number } | null {
+  let best: { sheet: XLSX.WorkSheet; score: number } | null = null;
+  for (const name of workbook.SheetNames) {
+    const sheet = workbook.Sheets[name];
+    if (!sheet) continue;
+    const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
+      defval: "",
+    });
+    if (json.length === 0) continue;
+    const score = scoreSheetKeys(Object.keys(json[0]));
+    if (!best || score > best.score) {
+      best = { sheet, score };
+    }
+  }
+  return best;
 }
 
 function xlsxToRows(buffer: Buffer): ParsedSheet {
   const workbook = XLSX.read(buffer, { type: "buffer", cellDates: true });
-  const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-  if (!firstSheet) return { rows: [], headers: [] };
+  const picked = pickBestSheet(workbook);
+  const sheet = picked ? picked.sheet : null;
+  if (!sheet) return { rows: [], headers: [] };
 
-  const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(firstSheet, {
+  const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
     defval: "",
   });
 
@@ -44,7 +91,8 @@ function tsvToRows(text: string): ParsedSheet {
     cellDates: true,
     FS: "\t",
   });
-  const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+  const picked = pickBestSheet(workbook);
+  const firstSheet = picked ? picked.sheet : null;
   if (!firstSheet) return { rows: [], headers: [] };
   const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(firstSheet, {
     defval: "",
@@ -91,10 +139,11 @@ export async function parseImportMatrix(
   if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const workbook = XLSX.read(buffer, { type: "buffer", cellDates: true });
-    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-    if (!firstSheet) return { headers: [], rows: [] };
+    const picked = pickBestSheet(workbook);
+    const sheet = picked ? picked.sheet : null;
+    if (!sheet) return { headers: [], rows: [] };
 
-    const aoa = XLSX.utils.sheet_to_json<unknown[]>(firstSheet, {
+    const aoa = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
       header: 1,
       defval: "",
       raw: false,
@@ -117,9 +166,10 @@ export async function parseImportMatrix(
       cellDates: true,
       FS: "\t",
     });
-    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-    if (!firstSheet) return { headers: [], rows: [] };
-    const aoa = XLSX.utils.sheet_to_json<unknown[]>(firstSheet, {
+    const picked = pickBestSheet(workbook);
+    const sheet = picked ? picked.sheet : null;
+    if (!sheet) return { headers: [], rows: [] };
+    const aoa = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
       header: 1,
       defval: "",
       raw: false,

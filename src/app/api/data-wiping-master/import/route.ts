@@ -44,6 +44,8 @@ export async function POST(request: NextRequest) {
   );
   const hasSerial =
     normalizedHeaders.includes("serialnumber") ||
+    normalizedHeaders.includes("manufacturerserialnumber") ||
+    normalizedHeaders.includes("manufacturerserialno") ||
     normalizedHeaders.includes("serialnumberassettag") ||
     normalizedHeaders.includes("assetag");
   if (!hasSerial) {

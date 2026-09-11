@@ -465,7 +465,9 @@ export function rowToDataWipingMasterData(
 ): DataWipingMasterCsvData {
   const n = normalizeRow(row);
   return {
-    pickupId: n["pickupid"] ?? n["pickupnumber"] ?? undefined,
+    pickupId:
+      n["pickupid"] ??
+      (n["pickupnumber"] ?? (n["lotnumber"] ?? (n["lotno"] ?? undefined))),
     serialNumber:
       n["manufacturerserialnumber"] ??
       (n["manufacturerserialno"] ?? (n["serialnumber"] || n["assetag"] || undefined)),
