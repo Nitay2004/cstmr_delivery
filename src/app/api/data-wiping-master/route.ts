@@ -24,7 +24,8 @@ export async function GET(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!user.permissions.viewDataWipingMaster) {
+  const canMaster = user.permissions.viewDataWipingMaster;
+  if (!canMaster && !user.permissions.viewDataWiping) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -40,6 +41,8 @@ export async function GET(request: NextRequest) {
     where.OR = SEARCH_FIELDS.map((field) => ({
       [field]: { contains: search, mode: "insensitive" as const },
     }));
+  } else if (!canMaster && pickupId === "") {
+    return NextResponse.json({ total: 0, items: [], page, pageSize });
   }
   if (pickupId !== "") {
     where.pickupId = pickupId;
