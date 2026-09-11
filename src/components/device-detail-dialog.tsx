@@ -60,6 +60,8 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   pickup: string;
   deviceType: "Laptop" | "Desktop";
+  wiped?: string;
+  hddAvailable?: string;
 }
 
 export function DeviceDetailDialog({
@@ -67,6 +69,8 @@ export function DeviceDetailDialog({
   onOpenChange,
   pickup,
   deviceType,
+  wiped,
+  hddAvailable,
 }: Props) {
   const [items, setItems] = useState<Item[]>([]);
   const [total, setTotal] = useState(0);
@@ -75,7 +79,7 @@ export function DeviceDetailDialog({
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const resetKey = `${open ? "1" : "0"}|${pickup}|${deviceType}`;
+  const resetKey = `${open ? "1" : "0"}|${pickup}|${deviceType}|${wiped ?? ""}|${hddAvailable ?? ""}`;
   const [prevKey, setPrevKey] = useState(resetKey);
   if (prevKey !== resetKey) {
     setPrevKey(resetKey);
@@ -95,6 +99,8 @@ export function DeviceDetailDialog({
       pickupId: pickup,
       assetType: deviceType,
     });
+    if (wiped) params.set("wiped", wiped);
+    if (hddAvailable) params.set("hddAvailable", hddAvailable);
     fetch(`${API_PATH}?${params.toString()}`, { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
@@ -118,7 +124,7 @@ export function DeviceDetailDialog({
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [open, pickup, deviceType, page, pageSize]);
+  }, [open, pickup, deviceType, page, pageSize, wiped, hddAvailable]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -136,17 +142,28 @@ export function DeviceDetailDialog({
     setError(null);
   };
 
+  const filtered =
+    typeof wiped === "string" &&
+    wiped !== "" &&
+    typeof hddAvailable === "string" &&
+    hddAvailable !== "";
+  const title = filtered
+    ? `${deviceType} Data Sanitized — ${pickup || "Unknown Pickup"}`
+    : `${deviceType} details — ${pickup || "Unknown Pickup"}`;
+  const description = filtered
+    ? `${total.toLocaleString("en-IN")} ${deviceType.toLowerCase()}${
+        total === 1 ? "" : "s"
+      } wiped with HDD available for this pick up.`
+    : `${total.toLocaleString("en-IN")} ${deviceType.toLowerCase()}${
+        total === 1 ? "" : "s"
+      } for this pick up.`;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {deviceType} details — {pickup || "Unknown Pickup"}
-          </DialogTitle>
-          <DialogDescription>
-            {total.toLocaleString("en-IN")} {deviceType.toLowerCase()}
-            {total === 1 ? "" : "s"} for this pick up.
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         <div className="flex min-h-0 flex-1 flex-col gap-3">

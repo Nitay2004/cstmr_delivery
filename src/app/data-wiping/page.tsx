@@ -84,6 +84,7 @@ export default function DataWipingPage() {
   const [detail, setDetail] = useState<{
     pickup: string;
     deviceType: "Laptop" | "Desktop";
+    sanitized?: boolean;
   } | null>(null);
 
   const openDetail = (pickup: string, deviceType: "Laptop" | "Desktop") => {
@@ -91,15 +92,27 @@ export default function DataWipingPage() {
     setDetail({ pickup, deviceType });
   };
 
-  const countLink = (row: ModuleRow, deviceType: "Laptop" | "Desktop") => {
-    const value = Number(row[deviceType.toLowerCase()] ?? 0);
+  const countLink = (
+    row: ModuleRow,
+    deviceType: "Laptop" | "Desktop",
+    valueKey: string,
+    sanitized?: boolean
+  ) => {
+    const value = Number(row[valueKey] ?? 0);
     if (!value || value <= 0) return <span className="text-muted-foreground">—</span>;
+    const open = sanitized
+      ? () => setDetail({ pickup: String(row.pickup ?? ""), deviceType, sanitized: true })
+      : () => openDetail(String(row.pickup ?? ""), deviceType);
     return (
       <button
         type="button"
-        onClick={() => openDetail(String(row.pickup ?? ""), deviceType)}
+        onClick={open}
         className="font-medium text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
-        title={`View ${deviceType} details for ${String(row.pickup ?? "")}`}
+        title={
+          sanitized
+            ? `View ${deviceType} data sanitized for ${String(row.pickup ?? "")}`
+            : `View ${deviceType} details for ${String(row.pickup ?? "")}`
+        }
       >
         {value.toLocaleString("en-IN")}
       </button>
@@ -115,20 +128,30 @@ export default function DataWipingPage() {
       key: "laptop",
       label: "Laptop",
       align: "right",
-      render: (row) => countLink(row, "Laptop"),
+      render: (row) => countLink(row, "Laptop", "laptop"),
     },
     { key: "laptopSsdHddReceived", label: "SSD/HDD Received", align: "right" },
-    { key: "laptopWiped", label: "Laptop Data Sanitized", align: "right" },
+    {
+      key: "laptopWiped",
+      label: "Laptop Data Sanitized",
+      align: "right",
+      render: (row) => countLink(row, "Laptop", "laptopWiped", true),
+    },
     { key: "laptopShreddingDone", label: "Shredding Done", align: "right" },
     { key: "laptopNotWiped", label: "Laptop SSD Not Received", align: "right" },
     {
       key: "desktop",
       label: "Desktop",
       align: "right",
-      render: (row) => countLink(row, "Desktop"),
+      render: (row) => countLink(row, "Desktop", "desktop"),
     },
     { key: "desktopSsdHddReceived", label: "SSD/HDD Received", align: "right" },
-    { key: "desktopWiped", label: "Desktop Data Sanitized", align: "right" },
+    {
+      key: "desktopWiped",
+      label: "Desktop Data Sanitized",
+      align: "right",
+      render: (row) => countLink(row, "Desktop", "desktopWiped", true),
+    },
     { key: "desktopShreddingDone", label: "Shredding Done", align: "right" },
     { key: "desktopNotWiped", label: "Desktop SSD Not Received", align: "right" },
   ];
@@ -182,6 +205,8 @@ export default function DataWipingPage() {
         }}
         pickup={detail?.pickup ?? ""}
         deviceType={detail?.deviceType ?? "Laptop"}
+        wiped={detail?.sanitized ? "Yes" : undefined}
+        hddAvailable={detail?.sanitized ? "Yes" : undefined}
       />
     </div>
   );

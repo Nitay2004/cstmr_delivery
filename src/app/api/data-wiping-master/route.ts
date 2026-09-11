@@ -39,6 +39,8 @@ export async function GET(request: NextRequest) {
   const search = (searchParams.get("search") ?? "").trim();
   const pickupId = (searchParams.get("pickupId") ?? "").trim();
   const assetType = (searchParams.get("assetType") ?? "").trim();
+  const wiped = (searchParams.get("wiped") ?? "").trim();
+  const hddAvailable = (searchParams.get("hddAvailable") ?? "").trim();
 
   const where: Record<string, unknown> = {};
   if (search !== "") {
@@ -53,6 +55,12 @@ export async function GET(request: NextRequest) {
   }
   if (assetType !== "") {
     where.assetType = { equals: assetType, mode: "insensitive" as const };
+  }
+  if (wiped !== "") {
+    where.wiped = { equals: wiped, mode: "insensitive" as const };
+  }
+  if (hddAvailable !== "") {
+    where.hddAvailable = { equals: hddAvailable, mode: "insensitive" as const };
   }
 
   const [total, items] = await Promise.all([
