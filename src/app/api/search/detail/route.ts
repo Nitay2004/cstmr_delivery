@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import type { Permissions } from "@/lib/permissions";
 
 export const runtime = "nodejs";
 
@@ -32,6 +33,104 @@ const TYPE_MODEL: Record<
   consolidated: prisma.consolidated,
   user: prisma.user,
 };
+
+async function loadPickupRelated(
+  pickupRequestId: string,
+  pickupRef: string | null,
+  permissions: Permissions
+) {
+  const idMatch = { pickupRequestId };
+  const refMatch = pickupRef ? { pickup: pickupRef } : null;
+
+  let quotes: Array<Record<string, unknown>> | null = null;
+  if (permissions.viewQuotes) {
+    quotes = await prisma.quote.findMany({
+      where: { OR: [idMatch, ...(refMatch ? [refMatch] : [])] },
+      orderBy: { updatedAt: "desc" },
+      include: { files: true },
+    });
+  }
+  const quoteIds = quotes?.map((q) => String(q.id)) ?? [];
+
+  let purchaseOrders: Array<Record<string, unknown>> | null = null;
+  if (permissions.viewPurchaseOrders) {
+    purchaseOrders = await prisma.purchaseOrder.findMany({
+      where: {
+        OR: [
+          ...(refMatch ? [refMatch] : []),
+          ...(quoteIds.length ? [{ quoteId: { in: quoteIds } }] : []),
+        ],
+      },
+      orderBy: { updatedAt: "desc" },
+      include: { files: true },
+    });
+  }
+  const poNumbers =
+    purchaseOrders
+      ?.map((p) => p.purchaseOrderNo)
+      .filter((v): v is string => typeof v === "string") ?? [];
+
+  let payments: Array<Record<string, unknown>> | null = null;
+  if (permissions.viewPayments) {
+    payments = await prisma.payment.findMany({
+      where: {
+        OR: [
+          ...(refMatch ? [refMatch] : []),
+          ...(poNumbers.length ? [{ purchaseOrderNo: { in: poNumbers } }] : []),
+        ],
+      },
+      orderBy: { updatedAt: "desc" },
+      include: { files: true },
+    });
+  }
+
+  const [certificates, dataWipings, grns, files, devices] = await Promise.all([
+    permissions.viewCertificate
+      ? prisma.certificate.findMany({
+          where: { OR: [idMatch, ...(refMatch ? [refMatch] : [])] },
+          orderBy: { updatedAt: "desc" },
+          include: { files: true },
+        })
+      : null,
+    permissions.viewDataWiping
+      ? prisma.dataWiping.findMany({
+          where: { OR: [idMatch, ...(refMatch ? [refMatch] : [])] },
+          orderBy: { updatedAt: "desc" },
+          include: { files: true },
+        })
+      : null,
+    permissions.viewGrn
+      ? prisma.grn.findMany({
+          where: { OR: [idMatch, ...(refMatch ? [refMatch] : [])] },
+          orderBy: { updatedAt: "desc" },
+          include: { files: true },
+        })
+      : null,
+    prisma.pickupFile.findMany({
+      where: { pickupRequestId },
+      orderBy: { createdAt: "desc" },
+    }),
+    permissions.viewDataWipingMaster || permissions.viewDataWiping
+      ? refMatch
+        ? prisma.dataWipingMaster.findMany({
+            where: { pickupId: pickupRef },
+            orderBy: { updatedAt: "desc" },
+          })
+        : []
+      : null,
+  ]);
+
+  return {
+    quotes,
+    purchaseOrders,
+    payments,
+    certificates,
+    dataWipings,
+    grns,
+    files,
+    devices,
+  };
+}
 
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser(request);
@@ -65,6 +164,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  if (type === "pickup") {
+    const pickup = record as { id: string; pickup?: string | null };
+    const related = await loadPickupRelated(
+      pickup.id,
+      pickup.pickup ?? null,
+      user.permissions
+    );
+    return NextResponse.json({ record, related });
+  }
+
   if (type === "device") {
     const device = record as {
       id: string;
@@ -77,45 +186,24 @@ export async function GET(request: NextRequest) {
       [key: string]: unknown;
     };
     const pickupRef = device.pickupId ?? "";
-    const [pickupRequest, wipingRecord, quote, po, payment, certificate, grn] =
-      await Promise.all([
-        pickupRef
-          ? prisma.pickupRequest.findFirst({
-              where: { OR: [{ pickup: pickupRef }, { id: pickupRef }] },
-            })
-          : null,
-        pickupRef
-          ? prisma.dataWiping.findFirst({
-              where: { pickup: pickupRef },
-            })
-          : null,
-        pickupRef
-          ? prisma.quote.findFirst({ where: { pickup: pickupRef } })
-          : null,
-        pickupRef
-          ? prisma.purchaseOrder.findFirst({ where: { pickup: pickupRef } })
-          : null,
-        pickupRef
-          ? prisma.payment.findFirst({ where: { pickup: pickupRef } })
-          : null,
-        pickupRef
-          ? prisma.certificate.findFirst({ where: { pickup: pickupRef } })
-          : null,
-        pickupRef
-          ? prisma.grn.findFirst({ where: { pickup: pickupRef } })
-          : null,
-      ]);
+    const pickupRequest = pickupRef
+      ? await prisma.pickupRequest.findFirst({
+          where: { OR: [{ pickup: pickupRef }, { id: pickupRef }] },
+        })
+      : null;
+    const related = pickupRequest
+      ? {
+          pickupRequest,
+          ...(await loadPickupRelated(
+            pickupRequest.id,
+            pickupRequest.pickup ?? null,
+            user.permissions
+          )),
+        }
+      : { pickupRequest: null };
     return NextResponse.json({
       record,
-      related: {
-        pickupRequest: pickupRequest ?? null,
-        dataWiping: wipingRecord ?? null,
-        quote: quote ?? null,
-        po: po ?? null,
-        payment: payment ?? null,
-        certificate: certificate ?? null,
-        grn: grn ?? null,
-      },
+      related,
     });
   }
 

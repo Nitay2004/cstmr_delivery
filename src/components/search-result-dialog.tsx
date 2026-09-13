@@ -26,6 +26,14 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { PICKUP_DEVICE_FIELDS } from "@/lib/pickup-devices";
 import type { SearchResult } from "@/app/api/search/route";
 
@@ -194,80 +202,6 @@ const RELATED_CONFIG: Record<string, RelatedConfig> = {
       })),
     ],
   },
-  dataWiping: {
-    title: "Data Wiping",
-    fields: [
-      { key: "status", label: "Status", format: "badge" },
-      { key: "sourcingDealNo", label: "Sourcing Deal No." },
-      { key: "pickup", label: "Pickup" },
-      { key: "dataWipingId", label: "Data Wiping ID" },
-      { key: "laptop", label: "Laptop", format: "number" },
-      { key: "desktop", label: "Desktop", format: "number" },
-      { key: "total", label: "Total", format: "number" },
-    ],
-  },
-  quote: {
-    title: "Quote",
-    fields: [
-      { key: "stage", label: "Stage", format: "badge" },
-      { key: "sourcingDealNo", label: "Sourcing Deal No." },
-      { key: "pickup", label: "Pickup" },
-      { key: "quoteNo", label: "Quote No." },
-      { key: "totalAmount", label: "Total Amount", format: "amount" },
-      { key: "locationCode", label: "Location Code" },
-    ],
-  },
-  po: {
-    title: "Purchase Order",
-    fields: [
-      { key: "stage", label: "Stage", format: "badge" },
-      { key: "sourcingDealNo", label: "Sourcing Deal No." },
-      { key: "pickup", label: "Pickup" },
-      { key: "quoteNo", label: "Quote No." },
-      { key: "purchaseOrderNo", label: "Purchase Order No." },
-      { key: "locationCode", label: "Location Code" },
-    ],
-  },
-  payment: {
-    title: "Payment",
-    fields: [
-      { key: "stage", label: "Stage", format: "badge" },
-      { key: "sourcingDealNo", label: "Sourcing Deal No." },
-      { key: "pickup", label: "Pickup" },
-      { key: "purchaseOrderNo", label: "Purchase Order No." },
-      { key: "payment", label: "Payment" },
-      {
-        key: "totalInvoiceAmount",
-        label: "Total Invoice Amount",
-        format: "amount",
-      },
-      {
-        key: "totalPaymentDone",
-        label: "Total Payment Done",
-        format: "amount",
-      },
-      { key: "balanceAmount", label: "Balance Amount", format: "amount" },
-    ],
-  },
-  certificate: {
-    title: "Certificate",
-    fields: [
-      { key: "status", label: "Status", format: "badge" },
-      { key: "sourcingDealNo", label: "Sourcing Deal No." },
-      { key: "pickup", label: "Pickup" },
-    ],
-  },
-  grn: {
-    title: "Chain of Custody / GRN",
-    fields: [
-      { key: "stage", label: "Stage", format: "badge" },
-      { key: "sourcingDealNo", label: "Sourcing Deal No." },
-      { key: "pickup", label: "Pickup" },
-      { key: "grnDetails", label: "GRN Details" },
-      { key: "invoiceNumber", label: "Invoice Number" },
-      { key: "invoiceDate", label: "Invoice Date" },
-    ],
-  },
 };
   function isEmpty(value: unknown): boolean {
   return (
@@ -326,6 +260,300 @@ function FieldRow({
   );
 }
 
+interface FileEntry {
+  id: string;
+  fileName?: string | null;
+  storagePath?: string | null;
+}
+
+function asArray(value: unknown): Record<string, unknown>[] {
+  return Array.isArray(value) ? (value as Record<string, unknown>[]) : [];
+}
+
+function FileLinks({
+  files,
+  module,
+}: {
+  files: unknown;
+  module: string;
+}) {
+  const list = asArray(files) as unknown as FileEntry[];
+  if (list.length === 0) return <span className="text-muted-foreground">—</span>;
+  return (
+    <div className="flex flex-col gap-1">
+      {list.map((f) => (
+        <a
+          key={f.id}
+          href={`/api/attachments/file?module=${module}&id=${f.id}`}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex max-w-44 items-center gap-1 truncate font-medium text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
+          title="Open attachment"
+        >
+          <FileText className="size-3.5 shrink-0" />
+          <span className="truncate">{f.fileName || "PDF"}</span>
+        </a>
+      ))}
+    </div>
+  );
+}
+
+interface RelatedColumn {
+  key: string;
+  label: string;
+  format?: FieldFormat;
+  render?: (record: Record<string, unknown>) => React.ReactNode;
+}
+
+function cellValue(value: unknown, format?: FieldFormat): React.ReactNode {
+  if (format === "badge" && !isEmpty(value)) {
+    return (
+      <Badge variant="outline" className="font-medium">
+        {String(value)}
+      </Badge>
+    );
+  }
+  const text = formatValue(value, format);
+  return text || <span className="text-muted-foreground">—</span>;
+}
+
+function RelatedTable({
+  title,
+  columns,
+  records,
+}: {
+  title: string;
+  columns: RelatedColumn[];
+  records: Record<string, unknown>[];
+}) {
+  if (!records.length) return null;
+  return (
+    <div className="overflow-hidden rounded-lg border border-border/60">
+      <div className="border-b border-border/50 bg-muted/30 px-3 py-1.5 text-xs font-medium text-foreground">
+        {title}{" "}
+        <span className="text-muted-foreground">({records.length})</span>
+      </div>
+      <div className="max-h-72 overflow-auto">
+        <Table>
+          <TableHeader className="bg-muted/30">
+            <TableRow>
+              {columns.map((col) => (
+                <TableHead
+                  key={col.key}
+                  className="whitespace-nowrap text-xs"
+                >
+                  {col.label}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {records.map((r, i) => (
+              <TableRow key={String(r.id ?? i)}>
+                {columns.map((col) => (
+                  <TableCell
+                    key={col.key}
+                    className="whitespace-nowrap py-2 align-top"
+                  >
+                    {col.render ? col.render(r) : cellValue(r[col.key], col.format)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+
+function PickupRelatedTables({ related }: { related: Record<string, unknown> }) {
+  const quotes = asArray(related.quotes);
+  const purchaseOrders = asArray(related.purchaseOrders);
+  const payments = asArray(related.payments);
+  const certificates = asArray(related.certificates);
+  const dataWipings = asArray(related.dataWipings);
+  const grns = asArray(related.grns);
+  const pickupFiles = asArray(related.files) as unknown as FileEntry[];
+  const devices = asArray(related.devices);
+
+  const anyTable = [
+    quotes,
+    purchaseOrders,
+    payments,
+    certificates,
+    dataWipings,
+    grns,
+    devices,
+  ].some((arr) => arr.length > 0);
+
+  return (
+    <div className="flex flex-col gap-3">
+      {pickupFiles.length > 0 && (
+        <div className="overflow-hidden rounded-lg border border-border/60">
+          <div className="border-b border-border/50 bg-muted/30 px-3 py-1.5 text-xs font-medium text-foreground">
+            Pickup Files{" "}
+            <span className="text-muted-foreground">({pickupFiles.length})</span>
+          </div>
+          <div className="flex flex-col gap-1.5 p-3">
+            {pickupFiles.map((f) => (
+              <a
+                key={f.id}
+                href={`/api/attachments/file?module=pickup&id=${f.id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 truncate font-medium text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
+                title="Open file"
+              >
+                <FileText className="size-4 shrink-0" />
+                <span className="truncate">{f.fileName || "File"}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {anyTable && (
+        <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Related Records
+        </div>
+      )}
+
+      <RelatedTable
+        title="Quotes"
+        records={quotes}
+        columns={[
+          { key: "stage", label: "Stage", format: "badge" },
+          { key: "quoteNo", label: "Quote No." },
+          { key: "totalAmount", label: "Total", format: "amount" },
+          { key: "locationCode", label: "Location Code" },
+          {
+            key: "files",
+            label: "Files",
+            render: (r) => <FileLinks files={r.files} module="quote" />,
+          },
+        ]}
+      />
+
+      <RelatedTable
+        title="Purchase Orders"
+        records={purchaseOrders}
+        columns={[
+          { key: "stage", label: "Stage", format: "badge" },
+          { key: "purchaseOrderNo", label: "PO No." },
+          { key: "quoteNo", label: "Quote No." },
+          { key: "locationCode", label: "Location Code" },
+          {
+            key: "files",
+            label: "Files",
+            render: (r) => (
+              <FileLinks files={r.files} module="purchase-order" />
+            ),
+          },
+        ]}
+      />
+
+      <RelatedTable
+        title="Payments"
+        records={payments}
+        columns={[
+          { key: "payment", label: "Payment" },
+          { key: "purchaseOrderNo", label: "PO No." },
+          { key: "totalInvoiceAmount", label: "Invoice", format: "amount" },
+          { key: "totalPaymentDone", label: "Paid", format: "amount" },
+          { key: "balanceAmount", label: "Balance", format: "amount" },
+          { key: "stage", label: "Stage", format: "badge" },
+          {
+            key: "files",
+            label: "Files",
+            render: (r) => <FileLinks files={r.files} module="payment" />,
+          },
+        ]}
+      />
+
+      <RelatedTable
+        title="Certificates"
+        records={certificates}
+        columns={[
+          { key: "status", label: "Status", format: "badge" },
+          { key: "sourcingDealNo", label: "Sourcing Deal No." },
+          {
+            key: "files",
+            label: "PDFs",
+            render: (r) => (
+              <FileLinks files={r.files} module="certificate" />
+            ),
+          },
+        ]}
+      />
+
+      <RelatedTable
+        title="Data Wiping"
+        records={dataWipings}
+        columns={[
+          { key: "status", label: "Status", format: "badge" },
+          { key: "dataWipingId", label: "Data Wiping ID" },
+          { key: "laptop", label: "Laptop", format: "number" },
+          { key: "desktop", label: "Desktop", format: "number" },
+          { key: "total", label: "Total", format: "number" },
+          {
+            key: "files",
+            label: "Files",
+            render: (r) => <FileLinks files={r.files} module="data-wiping" />,
+          },
+        ]}
+      />
+
+      <RelatedTable
+        title="Chain of Custody / GRN"
+        records={grns}
+        columns={[
+          { key: "stage", label: "Stage", format: "badge" },
+          { key: "grnDetails", label: "GRN Details" },
+          { key: "invoiceNumber", label: "Invoice No." },
+          { key: "invoiceDate", label: "Invoice Date" },
+          {
+            key: "files",
+            label: "Files",
+            render: (r) => <FileLinks files={r.files} module="grn" />,
+          },
+        ]}
+      />
+
+      <RelatedTable
+        title="Assets / Serial Numbers"
+        records={devices}
+        columns={[
+          { key: "serialNumber", label: "Serial Number" },
+          { key: "assetType", label: "Asset Type" },
+          { key: "hddSerialNumber", label: "HDD Serial No." },
+          { key: "wiped", label: "Wiped" },
+          { key: "hddAvailable", label: "HDD Available" },
+          {
+            key: "pdf",
+            label: "PDF",
+            render: (r) =>
+              r.id && r.pdfName ? (
+                <a
+                  href={`/api/data-wiping-master/file?assetId=${String(r.id)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex max-w-44 items-center gap-1 truncate font-medium text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
+                  title="Open PDF"
+                >
+                  <FileText className="size-3.5 shrink-0" />
+                  <span className="truncate">{String(r.pdfName)}</span>
+                </a>
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              ),
+          },
+        ]}
+      />
+    </div>
+  );
+}
+
 function ResultBody({
   result,
   onClose,
@@ -371,12 +599,15 @@ function ResultBody({
   const IconComponent = typeIcons[result.type] ?? PackageOpen;
   const fields = FIELD_CONFIG[result.type] ?? [];
 
-  const relatedEntries =
-    result.type === "device" && related
-      ? (Object.entries(RELATED_CONFIG).filter(
-          ([key]) => Boolean(related[key])
-        ) as [string, RelatedConfig][])
-      : [];
+  const hasPickupRelated =
+    (result.type === "pickup" || result.type === "device") && related;
+  const pickupRequestRecord =
+    result.type === "device"
+      ? (related?.["pickupRequest"] as
+          | Record<string, unknown>
+          | null
+          | undefined) ?? null
+      : null;
 
   return (
     <>
@@ -418,40 +649,32 @@ function ResultBody({
               ))}
             </div>
 
-            {relatedEntries.length > 0 && (
+            {pickupRequestRecord && (
               <div className="mt-4">
                 <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Related Records
+                  Pickup Details
                 </div>
-                <div className="flex flex-col gap-3">
-                  {relatedEntries.map(([key, config]) => {
-                    const relatedRecord = related?.[key] as
-                      | Record<string, unknown>
-                      | null
-                      | undefined;
-                    if (!relatedRecord) return null;
-                    return (
-                      <div
-                        key={key}
-                        className="rounded-lg border border-border/60"
-                      >
-                        <div className="border-b border-border/50 bg-muted/30 px-3 py-1.5 text-xs font-medium text-foreground">
-                          {config.title}
-                        </div>
-                        <div className="divide-y divide-border/60">
-                          {config.fields.map((field) => (
-                            <FieldRow
-                              key={field.key}
-                              label={field.label}
-                              value={relatedRecord[field.key]}
-                              format={field.format}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="rounded-lg border border-border/60">
+                  <div className="border-b border-border/50 bg-muted/30 px-3 py-1.5 text-xs font-medium text-foreground">
+                    {RELATED_CONFIG.pickupRequest.title}
+                  </div>
+                  <div className="divide-y divide-border/60">
+                    {RELATED_CONFIG.pickupRequest.fields.map((field) => (
+                      <FieldRow
+                        key={field.key}
+                        label={field.label}
+                        value={pickupRequestRecord[field.key]}
+                        format={field.format}
+                      />
+                    ))}
+                  </div>
                 </div>
+              </div>
+            )}
+
+            {hasPickupRelated && (
+              <div className="mt-4">
+                <PickupRelatedTables related={related} />
               </div>
             )}
           </div>
