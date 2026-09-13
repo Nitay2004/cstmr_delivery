@@ -18,13 +18,12 @@ import {
   Users,
 } from "lucide-react";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PICKUP_DEVICE_FIELDS } from "@/lib/pickup-devices";
@@ -381,20 +380,20 @@ function ResultBody({
 
   return (
     <>
-      <SheetHeader className="border-b border-border/50">
+      <DialogHeader className="flex-none border-b border-border/50 p-4">
         <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
           <IconComponent className="size-4 text-primary" />
           {result.typeLabel}
         </div>
-        <SheetTitle className="mt-0.5 break-words pr-6 text-lg">
+        <DialogTitle className="mt-0.5 break-words pr-6 text-lg">
           {result.title}
-        </SheetTitle>
+        </DialogTitle>
         {result.subtitle && (
-          <SheetDescription className="break-words">
+          <DialogDescription className="break-words">
             {result.subtitle}
-          </SheetDescription>
+          </DialogDescription>
         )}
-      </SheetHeader>
+      </DialogHeader>
 
       <div className="flex-1 overflow-y-auto px-4">
         {loading ? (
@@ -459,7 +458,7 @@ function ResultBody({
         )}
       </div>
 
-      <SheetFooter className="border-t border-border/50">
+      <div className="flex-none border-t border-border/50 p-4">
         <Button
           className="w-full"
           onClick={() => {
@@ -470,7 +469,7 @@ function ResultBody({
           Open in {result.typeLabel}
           <ArrowUpRight />
         </Button>
-      </SheetFooter>
+      </div>
     </>
   );
 }
@@ -480,13 +479,12 @@ interface Props {
   onOpenChange: (open: boolean) => void;
 }
 
-export function SearchResultSheet({ result, onOpenChange }: Props) {
+export function SearchResultDialog({ result, onOpenChange }: Props) {
   return (
-    <Sheet open={!!result} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
+    <Dialog open={!!result} onOpenChange={onOpenChange}>
+      <DialogContent
         showCloseButton
-        className="flex max-h-full w-full flex-col gap-0 sm:max-w-md"
+        className="flex max-h-[85vh] w-full max-w-3xl flex-col gap-0 p-0"
       >
         {result ? (
           <ResultBody
@@ -495,7 +493,7 @@ export function SearchResultSheet({ result, onOpenChange }: Props) {
             onClose={() => onOpenChange(false)}
           />
         ) : null}
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

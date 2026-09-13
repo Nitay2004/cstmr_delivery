@@ -17,7 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { SearchResultSheet } from "@/components/search-result-sheet";
+import { SearchResultDialog } from "@/components/search-result-dialog";
 import { cn } from "@/lib/utils";
 import type { SearchResult } from "@/app/api/search/route";
 
@@ -222,7 +222,7 @@ export function GlobalSearch() {
         </div>
       )}
 
-      <SearchResultSheet
+      <SearchResultDialog
         result={selected}
         onOpenChange={(open) => {
           if (!open) setSelected(null);
