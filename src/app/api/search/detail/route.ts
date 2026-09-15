@@ -155,7 +155,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unknown type" }, { status: 400 });
   }
 
-  if (!user.permissions[permission as keyof typeof user.permissions]) {
+  const hasPermission =
+    type === "device"
+      ? user.permissions.viewDataWiping || user.permissions.viewDataWipingMaster
+      : user.permissions[permission as keyof typeof user.permissions];
+  if (!hasPermission) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
