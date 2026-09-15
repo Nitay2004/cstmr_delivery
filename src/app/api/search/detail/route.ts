@@ -37,7 +37,8 @@ const TYPE_MODEL: Record<
 async function loadPickupRelated(
   pickupRequestId: string,
   pickupRef: string | null,
-  permissions: Permissions
+  permissions: Permissions,
+  deviceId?: string
 ) {
   const idMatch = { pickupRequestId };
   const refMatch = pickupRef ? { pickup: pickupRef } : null;
@@ -113,7 +114,7 @@ async function loadPickupRelated(
     permissions.viewDataWipingMaster || permissions.viewDataWiping
       ? refMatch
         ? prisma.dataWipingMaster.findMany({
-            where: { pickupId: pickupRef },
+            where: deviceId ? { id: deviceId } : { pickupId: pickupRef },
             orderBy: { updatedAt: "desc" },
           })
         : []
@@ -201,7 +202,8 @@ export async function GET(request: NextRequest) {
           ...(await loadPickupRelated(
             pickupRequest.id,
             pickupRequest.pickup ?? null,
-            user.permissions
+            user.permissions,
+            device.id
           )),
         }
       : { pickupRequest: null };
