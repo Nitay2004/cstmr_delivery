@@ -8,17 +8,19 @@ import {
   normalizePermsOverrides,
 } from "@/lib/permissions";
 
+let cachedJwtSecret: Uint8Array | null = null;
+
 function getJwtSecret(): Uint8Array {
+  if (cachedJwtSecret) return cachedJwtSecret;
   const secret = process.env.JWT_SECRET;
   if (!secret) {
     throw new Error(
       "JWT_SECRET environment variable is required. Set it before starting the server."
     );
   }
-  return new TextEncoder().encode(secret);
+  cachedJwtSecret = new TextEncoder().encode(secret);
+  return cachedJwtSecret;
 }
-
-const JWT_SECRET = getJwtSecret();
 const TOKEN_EXPIRY = "30m";
 const TOKEN_MAX_AGE = 30 * 60;
 const IS_PROD = process.env.NODE_ENV === "production";
@@ -56,14 +58,14 @@ export async function createToken(user: AuthUser): Promise<string> {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(TOKEN_EXPIRY)
-    .sign(JWT_SECRET);
+    .sign(getJwtSecret());
 }
 
 export async function verifyToken(
   token: string
 ): Promise<AuthUser | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJwtSecret());
     const role = (payload.role as Role) ?? "VIEWER";
     return {
       id: payload.sub as string,
